@@ -1,0 +1,23 @@
+.icon-banner {
+    background-color: var(--silver);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    .icon-cont {
+        width: fit-content;
+        i {
+            border-radius: 100px;;
+            height: 55px;
+            width: 55px;
+            text-align: center;
+            background-color: black;
+            font-size: 35px;
+            padding: 10px;
+            color: white;
+            transition: ease-in-out .3s;
+            &:hover {
+                background-color: transparent;
+                color: black;
+            }
+        }
+    }
+}

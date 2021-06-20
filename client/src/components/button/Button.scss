@@ -1,0 +1,21 @@
+.web-button {
+    padding: 10px 0px;
+    background-color: black;
+    width: fit-content;
+    color: white;
+    cursor: pointer;
+    width: 200px;
+    text-align: center;
+    font-weight: 400;
+    font-size: 1.4rem;
+    border: 1px solid black;
+    transition: ease-in-out .3s;
+    &:hover {
+        background-color: transparent;
+        color: black;
+    }
+    &:active {
+        background-color: rgb(65, 65, 65);
+        color: white;
+    }
+}
