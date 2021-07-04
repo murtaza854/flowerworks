@@ -1,21 +1,114 @@
 .web-navbar {
     position: relative;
+    z-index: 9;
+    .cart-icon {
+        cursor: pointer;
+        // margin-right: 0.5rem;
+        border: 1px solid black;
+    }
     img {
-        width: 350px;
+        width: 21.875rem;
     }
     .nav-spacing {
-        margin-left: 50px;
+        margin-left: 3.125rem;
         .nav-link {
             text-transform: uppercase;
-            color: black;
+            color: black !important;
             font-weight: 400;
             font-size: 1.5rem;
+            margin-right: 0.938rem;
         }
         .ml-auto {
             width: fit-content;
             a {
                 color: black !important;
-                margin-left: 20px;
+            }
+        }
+    }
+    .first-box {
+        margin-right: 1.25rem;
+    }
+    .hover-box {
+        position: relative;
+        .account-icon {
+            position: relative;
+            cursor: pointer;
+            &:hover + .box-list {
+                outline: 1px solid rgb(138, 138, 138);
+                padding: 0.625rem 0;
+                height: 5rem;
+            }
+            &:hover + .cart-list-box {
+                outline: 1px solid rgb(138, 138, 138);
+                padding: 0.625rem 0;
+                height: 33rem;
+            }
+        }
+        .cart-buttons {
+            position: relative;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        .box-list, .cart-list-box {
+            position: absolute;
+            background-color: var(--silver);
+            right: 0;
+            border: 0;
+            overflow: hidden;
+            height: 0;
+            padding: 0;
+            transition: ease-in-out .3s;
+            li {
+                font-size: 1.2rem;
+                font-weight: 400;
+                text-indent: 1rem;
+                &:hover {
+                    font-weight: 500;
+                }
+            }
+        }
+        .box-list {
+            width: 12.5rem;
+            &:hover {
+                outline: 1px solid rgb(138, 138, 138);
+                padding: 0.625rem 0;
+                height: 5rem;
+            }
+        }
+        .cart-list {
+            height: 25rem;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            border-bottom: 1px solid rgb(138, 138, 138);
+            padding: 0.625rem 0;
+        }
+        .cart-list-box {
+            width: 40rem;
+            .cart-list-item {
+                padding-bottom: 1rem;
+            }
+            &:hover {
+                outline: 1px solid rgb(138, 138, 138);
+                padding: 0.625rem 0;
+                height: 33rem;
+            }
+            img {
+                width: 100%;
+            }
+            input[type="text"] {
+                background-color: transparent;
+                border: 1px solid black;
+                padding: 0.938rem 0.75rem 0.938rem;
+                width: 100%;
+                border-radius: 0;
+                text-align: center;
+                font-size: 1rem;
+                &:focus {
+                    box-shadow: none;
+                    background-color: transparent;
+                    border: 1px solid black;
+                    outline: none;
+                }
             }
         }
     }

@@ -1,9 +1,9 @@
 import React from 'react';
-import './Heading.scss'
+import './Heading3.scss'
 
-function Heading(props) {
+function Heading3(props) {
     return (
-        <div className="heading">
+        <div className="heading3">
             <p className={props.classes}>
                 {props.first} <span>{props.bold}</span> {props.second}
             </p>
@@ -11,4 +11,4 @@ function Heading(props) {
     );
 }
 
-export default Heading;
+export default Heading3;

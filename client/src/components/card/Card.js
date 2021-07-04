@@ -10,7 +10,7 @@ function Card(props) {
                 <div className="middle">
                     <div className={props.classes}>
                         {props.button}
-                        <div className="spacing-between"></div>
+                        <div className={props.classes1}></div>
                         {props.button1}
                     </div>
                 </div>

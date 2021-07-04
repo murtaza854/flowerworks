@@ -1,21 +1,75 @@
 .web-button {
-    padding: 10px 0px;
-    background-color: black;
+    display: block;
     width: fit-content;
-    color: white;
-    cursor: pointer;
-    width: 200px;
-    text-align: center;
-    font-weight: 400;
-    font-size: 1.4rem;
-    border: 1px solid black;
-    transition: ease-in-out .3s;
-    &:hover {
-        background-color: transparent;
-        color: black;
-    }
-    &:active {
-        background-color: rgb(65, 65, 65);
+    div {
+        padding: 0.625rem 0;
+        background-color: black;
         color: white;
+        cursor: pointer;
+        width: 12.5rem;
+        text-align: center;
+        font-weight: 400;
+        font-size: 1.4rem;
+        border: 1px solid black;
+        transition: ease-in-out .3s;
+        &:hover {
+            background-color: transparent;
+            color: black;
+        }
+        &:active {
+            background-color: rgb(65, 65, 65);
+            color: white;
+        }
+    }
+}
+
+// X-Large devices (large desktops, less than 1400px)
+@media (max-width: 87.49875em) {
+    .web-button {
+        div {
+            font-size: 1.33rem;
+        }
+    }
+}
+
+// Large devices (desktops, less than 1200px)
+@media (max-width: 74.99875em) {
+    .web-button {
+        div {
+            width: 12rem;
+            font-size: 1.26rem;
+        }
+    }
+}
+
+// Medium devices (tablets, less than 992px)
+@media (max-width: 61.99875em) {
+    .btn-center-991 {
+        margin: 0 auto;
+    }
+    .web-button {
+        div {
+            width: 10rem;
+            font-size: 1.19rem;
+        }
+    }
+}
+
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 47.99875em) {
+    .web-button {
+        div {
+            width: 9.5rem;
+            font-size: 1.12rem;
+        }
+    }
+}
+
+// X-Small devices (portrait phones, less than 576px)
+@media (max-width: 35.99875em) {
+    .web-button {
+        div {
+            font-size: 1.05rem;
+        }
     }
 }

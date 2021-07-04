@@ -1,0 +1,21 @@
+.radio-box {
+    background-color: var(--silver);
+    height: 23rem;
+    padding: 2rem 2rem 0.3rem 2rem;
+    position: relative;
+    .text {
+        margin-top: 1.6rem;
+    }
+    .optional {
+        width: fit-content;
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 2.7rem 0 0 2rem;
+    }
+    .scroll {
+        overflow-y: scroll;
+        overflow-x: hidden;
+        height: 13.5rem;
+    }
+}

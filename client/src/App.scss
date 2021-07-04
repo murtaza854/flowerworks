@@ -44,57 +44,6 @@
   font-family: 'Raleway', sans-serif;
 }
 
-:root {
-  --silver: #F9F9F9;
-}
-
-.no-textdecoration {
-  text-decoration: none !important;
-}
-
-.fit-content {
-  width: fit-content !important;
-}
-
-a {
-  text-decoration: none;
-}
-
-
-.center-relative {
-  position: relative;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.center-absolute {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.fit-content {
-  width: fit-content;
-}
-
-.p-0 {
-  padding: 0;
-}
-
-.ml-auto {
-  margin-left: auto !important;
-}
-
-.global-mt-1 {
-  margin-top: 130px;
-}
-
-.global-mt-2 {
-  margin-top: 60px;
-}
-
-.global-mt-3 {
-  margin-top: 20px;
+html {
+  scroll-behavior: smooth !important;
 }

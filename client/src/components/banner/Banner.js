@@ -6,10 +6,10 @@ function Banner(props) {
     return (
         <Container className="banner">
             <Row>
-                <Col md={9}>
+                <Col lg={9}>
                     {props.heading}
                 </Col>
-                <Col>
+                <Col className="banner-spacing">
                     {props.button}
                 </Col>
             </Row>

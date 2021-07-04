@@ -1,0 +1,135 @@
+:root {
+  --silver: #f9f9f9;
+}
+
+.no-textdecoration {
+  text-decoration: none !important;
+}
+
+.fit-content {
+  width: fit-content !important;
+}
+
+a {
+  text-decoration: none;
+}
+
+.center-relative {
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.horizontal-center-relative {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.center-absolute {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.vertical-center-relative {
+  position: relative;
+  width: fit-content;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.horizontal-center-margin {
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+}
+
+.unhide-991 {
+  display: none;
+}
+
+.fit-content {
+  width: fit-content;
+}
+
+.p-0 {
+  padding: 0;
+}
+
+.ml-auto {
+  margin-left: auto !important;
+}
+
+.global-mt-1 {
+  margin-top: 8.125rem;
+}
+
+.global-mt-2 {
+  margin-top: 3.75rem;
+}
+
+.global-mt-3 {
+  margin-top: 1.25rem;
+}
+
+.transition {
+  position: relative;
+  // height: 100%;
+}
+
+.page {
+  position: absolute;
+  background-color: white;
+  width: 100%;
+}
+
+.page-enter {
+  opacity: 0;
+  // transform: scale(1.1);
+}
+
+.page-enter-active {
+  opacity: 1;
+  // transform: scale(1);
+  transition: opacity 250ms;
+}
+
+.page-exit {
+  opacity: 1;
+  // transform: scale(1);
+}
+
+.page-exit-active {
+  opacity: 0;
+  // transform: scale(0.9);
+  transition: opacity 250ms;
+}
+
+// X-Large devices (large desktops, less than 1400px)
+@media (max-width: 87.49875em) {
+}
+
+// Large devices (desktops, less than 1200px)
+@media (max-width: 74.99875em) {
+}
+
+// Medium devices (tablets, less than 992px)
+@media (max-width: 61.99875em) {
+  .unhide-991 {
+    display: block;
+  }
+  .hide-991 {
+    display: none;
+  }
+}
+
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 47.99875em) {
+}
+
+// X-Small devices (portrait phones, less than 576px)
+@media (max-width: 35.99875em) {
+}
