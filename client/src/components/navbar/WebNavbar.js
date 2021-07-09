@@ -9,7 +9,7 @@ import CartContext from '../../share';
 import {
     Link
 } from "react-router-dom";
-import { Heading3, ParaText } from '../../components';
+import { Heading3, ParaText, Heading2 } from '../../components';
 import api from '../../api';
 import './WebNavbar.scss';
 
@@ -120,20 +120,34 @@ function WebNavbar(props) {
                                         </Badge>
                                     </Link>
                                     <div className="cart-list-box">
-                                        <div className="cart-list">
-                                            {data}
-                                        </div>
-                                        <div className="cart-buttons">
-                                            <Heading3
-                                                bold={`Total: PKR.${cart.cartObj.cartTotalPrice}`}
-                                                classes="text-uppercase"
-                                            />
-                                            <Heading3
-                                                first="Go to"
-                                                bold="cart"
-                                                classes="text-uppercase"
-                                            />
-                                        </div>
+                                        {
+                                            data.length === 0 ? (
+                                                <div className="center-relative-fit-content">
+                                                    <Heading2
+                                                        first="Cart is"
+                                                        bold="Empty!"
+                                                        classes="text-uppercase"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <div className="cart-list">
+                                                        {data}
+                                                    </div>
+                                                    <div className="cart-buttons">
+                                                        <Heading3
+                                                            bold={`Total: PKR.${cart.cartObj.cartTotalPrice}`}
+                                                            classes="text-uppercase"
+                                                        />
+                                                        <Heading3
+                                                            first="Go to"
+                                                            bold="cart"
+                                                            classes="text-uppercase"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
                                     </div>
                                 </div>
                             </Nav>

@@ -6,6 +6,7 @@ import {
 import './App.scss';
 import Routes from './Routes';
 import { Admin } from './admin';
+import { Thankyou } from './pages';
 // import './Form.scss';
 // import './global.scss';
 
@@ -23,6 +24,7 @@ function App() {
   return (
     <Router>
       <Switch>
+        <Route path="/thankyou" children={<Thankyou />} />
         <Route path="/admin">
           <Admin />
         </Route>
@@ -30,7 +32,7 @@ function App() {
           <Routes />
         </Route>
       </Switch>
-    {/* <div>
+      {/* <div>
       {routes.map(({ path, id, Component }) => (
         <Route key={id} exact path={path}>
           {({ match }) => (

@@ -197,6 +197,24 @@ function DeliveryForm(props) {
                     />
                 </Row>
                 <Row className="justify-content-between">
+                    <Col md={5}>
+                        <ThemeProvider theme={theme}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        onChange={changeReceiverCheckbox}
+                                        disableRipple={true}
+                                        value={props.checkBoxes.receiver}
+                                        icon={<CheckBoxOutlineBlankOutlinedIcon fontSize="large" />}
+                                        checkedIcon={<CheckBoxOutlinedIcon fontSize="large" />} />
+                                }
+                                label="I am the receiver"
+                            />
+                        </ThemeProvider>
+                    </Col>
+                </Row>
+                <div className="global-mt-3"></div>
+                <Row className="justify-content-between">
                     <Form.Group as={Col} md={5} controlId="firstName">
                         <Form.Label>First Name:</Form.Label>
                         <Form.Control type="text"
@@ -285,23 +303,6 @@ function DeliveryForm(props) {
                         />
                     </Form.Group>
                 </Row>
-                <Row className="justify-content-between">
-                    <Col md={5}>
-                        <ThemeProvider theme={theme}>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        onChange={changeReceiverCheckbox}
-                                        disableRipple={true}
-                                        value={props.checkBoxes.receiver}
-                                        icon={<CheckBoxOutlineBlankOutlinedIcon fontSize="large" />}
-                                        checkedIcon={<CheckBoxOutlinedIcon fontSize="large" />} />
-                                }
-                                label="I am the receiver"
-                            />
-                        </ThemeProvider>
-                    </Col>
-                </Row>
                 <Row className="global-mt-3 justify-content-between">
                     <Col md={5}>
                         <Row>
@@ -344,7 +345,7 @@ function DeliveryForm(props) {
                 <div className="global-mt-2"></div>
                 <Row>
                     <div className="horizontal-center-margin">
-                        <Button cartForm={3} setActive={props.setActive} setActiveCompClass={props.setActiveCompClass} to="/" text="Proceed" classes="text-uppercase" />
+                        <Button cartForm={3} canSubmit={props.canSubmit} setActive={props.setActive} setActiveCompClass={props.setActiveCompClass} to="/" text="Proceed" classes="text-uppercase" />
                     </div>
                 </Row>
                 <div className="global-mt-3"></div>

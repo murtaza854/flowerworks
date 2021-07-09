@@ -1,0 +1,16 @@
+.thankyou {
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    h1 {
+        font-size: 6.25rem;
+        font-weight: 700;
+        color: black;
+    }
+    .main-content__checkmark {
+        font-size: 9.75rem;
+        color: black;
+    }
+}

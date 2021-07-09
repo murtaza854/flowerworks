@@ -39,6 +39,7 @@ const createServer = async ( callback ) => {
     const sizeRoutes = require('./routes/size');
     const colorRoutes = require('./routes/color');
     const areaRoutes = require('./routes/area');
+    const orderRoutes = require('./routes/order');
     
     app.use('/api/users', userRoutes);
     app.use('/api/cart', cartRoutes);
@@ -49,6 +50,7 @@ const createServer = async ( callback ) => {
     app.use('/api/sizes', sizeRoutes);
     app.use('/api/colors', colorRoutes);
     app.use('/api/areas', areaRoutes);
+    app.use('/api/orders', orderRoutes);
     
     app.listen(port, () => {
         console.log(`Example app listening at http://localhost:${port}`);

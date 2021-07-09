@@ -58,7 +58,7 @@ router.get('/loggedIn', async (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-    res.cookie('token', '', {maxAge: 0, sameSite: 'lax'})
+    res.cookie('token', '', {maxAge: 0, sameSite: 'lax'});
 
     res.send({
         message: 'success'

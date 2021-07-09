@@ -6,6 +6,7 @@ const flower = require('./flower');
 const color = require('./color');
 const size = require('./size');
 const area = require('./area');
+const order = require('./order');
 
 module.exports = {
     user,
@@ -15,5 +16,6 @@ module.exports = {
     flower,
     color,
     size,
-    area
+    area,
+    order
 };

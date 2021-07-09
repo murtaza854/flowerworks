@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Divider, Heading1 } from '../../components';
-import { ProductList, DeliveryForm } from './components';
+import { ProductList, DeliveryForm, Payment } from './components';
 import UserContext from '../../authenticatedUser';
 import './Cart.scss';
 
 function Cart(props) {
+    const [canSubmit, setCanSubmit] = useState(false);
+
     const user = useContext(UserContext);
     const [active, setActive] = useState({ 1: "circle active", 2: "circle", 3: "circle" });
-    const [activeCompClass, setActiveCompClass] = useState({ 1: '', 2: 'hide' });
+    const [activeCompClass, setActiveCompClass] = useState({ 1: '', 2: 'hide', 3: 'hide' });
 
     const [firstName, setFirstName] = useState({ value: '', errorText: '', error: false, readOnly: false });
     const [lastName, setLastName] = useState({ value: '', errorText: '', error: false, readOnly: false });
@@ -21,20 +23,48 @@ function Cart(props) {
     const [email1, setEmail1] = useState({ value: '', errorText: '', error: false, readOnly: false });
 
     const [area, setArea] = useState({ value: '-', errorText: '', error: false });
-    const [addressLine1, setAddressLine1] = useState({ value: '' });
+    const [addressLine1, setAddressLine1] = useState({ value: '', errorText: '', error: false });
     const [landmark, setLandmark] = useState({ value: '' });
     const [addressLine2, setAddressLine2] = useState({ value: '' });
 
-    const [date, setDate] = useState({value: undefined, errorText: '', error: false });
+    const [date, setDate] = useState({ value: undefined, errorText: '', error: false });
     const [message, setMessage] = useState({ value: '' });
 
     const [checkBoxes, setCheckboxes] = useState({ receiver: false, callMe: false });
 
-    // const [canSubmit, setCanSubmit] = useState(false);
+    const [radioBoxes, setRadioBoxes] = useState({ method: 'Cash on Delivery' });
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [active]);
+
+    useEffect(() => {
+        let flag = true;
+        // console.log(firstName)
+        if (firstName.error === true) flag = false;
+        else if (firstName.value === '') flag = false;
+        else if (lastName.error === true) flag = false;
+        else if (lastName.value === '') flag = false;
+        else if (phoneNumber.error === true) flag = false;
+        else if (phoneNumber.value === '') flag = false;
+        else if (email.error === true) flag = false;
+        else if (email.value === '') flag = false;
+        else if (firstName1.error === true) flag = false;
+        else if (firstName1.value === '') flag = false;
+        else if (lastName1.error === true) flag = false;
+        else if (lastName1.value === '') flag = false;
+        else if (phoneNumber1.error === true) flag = false;
+        else if (phoneNumber1.value === '') flag = false;
+        else if (email1.error === true) flag = false;
+        else if (email1.value === '') flag = false;
+        else if (area.error === true) flag = false;
+        else if (area.value === '') flag = false;
+        else if (addressLine1.error === true) flag = false;
+        else if (addressLine1.value === '') flag = false;
+        else if (date.error === true) flag = false;
+        else if (date.value === '') flag = false;
+        setCanSubmit(flag);
+    }, [firstName, lastName, phoneNumber, email, firstName1, lastName1, phoneNumber1, email1, area, addressLine1, date]);
 
     useEffect(() => {
         try {
@@ -67,12 +97,16 @@ function Cart(props) {
     const handleChange = num => {
         if (num === 1) {
             setActive({ 1: "circle active", 2: "circle", 3: "circle" });
-            setActiveCompClass({ 1: '', 2: 'hide' });
+            setActiveCompClass({ 1: '', 2: 'hide', 3: 'hide' });
         }
         else if (num === 2) {
             setActive({ 1: "circle", 2: "circle active", 3: "circle" });
-            setActiveCompClass({ 1: 'hide', 2: '' });
+            setActiveCompClass({ 1: 'hide', 2: '', 3: 'hide' });
         }
+        else if (num === 3 && canSubmit === true) {
+            setActive({ 1: "circle", 2: "circle", 3: "circle active" });
+            setActiveCompClass({ 1: 'hide', 2: 'hide', 3: '' });
+        } else if (num === 3 && canSubmit === false) alert('Fill delivery form.')
     }
 
     return (
@@ -145,7 +179,7 @@ function Cart(props) {
                         setPhoneNumber1={setPhoneNumber1}
                         email1={email1}
                         setEmail1={setEmail1}
-                        
+
                         area={area}
                         setArea={setArea}
                         addressLine1={addressLine1}
@@ -165,6 +199,34 @@ function Cart(props) {
 
                         setActive={setActive}
                         setActiveCompClass={setActiveCompClass}
+
+                        canSubmit={canSubmit}
+                    />
+                </div>
+                <div className={`${active[3]} ${activeCompClass[3]}`}>
+                    <Payment
+                        firstName={firstName.value}
+                        lastName={lastName.value}
+                        phoneNumber={phoneNumber.value}
+                        email={email.value}
+
+                        firstName1={firstName1.value}
+                        lastName1={lastName1.value}
+                        phoneNumber1={phoneNumber1.value}
+                        email1={email1.value}
+
+                        area={area.value}
+                        addressLine1={addressLine1.value}
+                        landmark={landmark.value}
+                        addressLine2={addressLine2.value}
+
+                        date={date.value}
+                        message={message.value}
+
+                        checkBoxes={checkBoxes}
+                        
+                        radioBoxes={radioBoxes}
+                        setRadioBoxes={setRadioBoxes}
                     />
                 </div>
             </Container>

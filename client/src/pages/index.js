@@ -6,3 +6,4 @@ export { default as Signin } from './signin/Signin';
 export { default as Subscribe } from './subscribe/Subscribe';
 export { default as Cart } from './cart/Cart';
 export { default as Product } from './product/Product';
+export { default as Thankyou } from './thankyou/Thankyou';

@@ -29,8 +29,8 @@ function Category(props) {
     return (
         <Container className="category">
             <Row className="justify-content-center">
-                {/* {categoryArray} */}
-                <Col md={4} className="spacing">
+                {categoryArray}
+                {/* <Col md={4} className="spacing">
                     <Card button={<Button to="box" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" />
                 </Col>
                 <Col md={4} className="spacing">
@@ -44,7 +44,7 @@ function Category(props) {
                 </Col>
                 <Col md={4} className="spacing">
                     <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
-                </Col>
+                </Col> */}
             </Row>
             {/* <Row className="justify-content-center"> */}
                 {/* <Col md={4} className="spacing">
