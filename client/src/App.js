@@ -7,6 +7,9 @@ import './App.scss';
 import Routes from './Routes';
 import { Admin } from './admin';
 import { Thankyou } from './pages';
+import api from "./api";
+import React, { useState, useEffect } from 'react';
+import UserContext from "./authenticatedUser";
 // import './Form.scss';
 // import './global.scss';
 
@@ -21,120 +24,48 @@ import { Thankyou } from './pages';
 // ]
 
 function App() {
+  const [userState, setUserState] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (
+      async () => {
+        const response = await fetch(`${api}/users/loggedIn`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store'
+          },
+          credentials: 'include',
+          withCredentials: true,
+        });
+        const content = await response.json();
+        try {
+          const user = content.data;
+          setUserState(user);
+        } catch (error) {
+          setUserState(null);
+        }
+        setLoading(false)
+      })();
+  }, []);
+
+  if (loading) return <div></div>
+
   return (
-    <Router>
-      <Switch>
-        <Route path="/thankyou" children={<Thankyou />} />
-        <Route path="/admin">
-          <Admin />
-        </Route>
-        <Route path="*">
-          <Routes />
-        </Route>
-      </Switch>
-      {/* <div>
-      {routes.map(({ path, id, Component }) => (
-        <Route key={id} exact path={path}>
-          {({ match }) => (
-            <div>
-            <CSSTransition
-              key={id}
-              in={match != null}
-              timeout={300}
-              classNames="page"
-              unmountOnExit
-            >
-              <div className="page">
-                <SmallBanner />
-                <div className="global-mt-2"></div>
-                <Navbar />
-                <div className="global-mt-1"></div>
-                <Component />
-                <div className="global-mt-1"></div>
-                <IconBanner />
-                <Footer />
-              </div>
-            </CSSTransition>
-            </div>
-          )}
-        </Route>
-      ))}
-    </div> */}
-      {/* <div>
-      <Switch>
-        <Route path="/do-it-yourself">
-          <SmallBanner />
-          <div className="global-mt-2"></div>
-          <Navbar />
-          <div className="global-mt-1"></div>
-          <DIY />
-          <div className="global-mt-1"></div>
-          <IconBanner />
-          <Footer />
-        </Route>
-        <Route path="/cart">
-          <SmallBanner />
-          <div className="global-mt-2"></div>
-          <Navbar />
-          <div className="global-mt-1"></div>
-          <Cart />
-          <div className="global-mt-1"></div>
-          <IconBanner />
-          <Footer />
-        </Route>
-        <Route path="/subscribe">
-          <SmallBanner />
-          <div className="global-mt-2"></div>
-          <Navbar />
-          <div className="global-mt-1"></div>
-          <Subscribe />
-          <div className="global-mt-1"></div>
-          <IconBanner />
-          <Footer />
-        </Route>
-        <Route path="/signin">
-          <SmallBanner />
-          <div className="global-mt-2"></div>
-          <Navbar />
-          <div className="global-mt-1"></div>
-          <Signin />
-          <div className="global-mt-1"></div>
-          <IconBanner />
-          <Footer />
-        </Route>
-        <Route path="/signup">
-          <SmallBanner />
-          <div className="global-mt-2"></div>
-          <Navbar />
-          <div className="global-mt-1"></div>
-          <Signup />
-          <div className="global-mt-1"></div>
-          <IconBanner />
-          <Footer />
-        </Route>
-        <Route path="/:category">
-          <SmallBanner />
-          <div className="global-mt-2"></div>
-          <Navbar />
-          <div className="global-mt-1"></div>
-          <Shop />
-          <div className="global-mt-1"></div>
-          <IconBanner />
-          <Footer />
-        </Route>
-        <Route>
-          <SmallBanner />
-          <div className="global-mt-2"></div>
-          <Navbar />
-          <div className="global-mt-1"></div>
-          <Home />
-          <div className="global-mt-1"></div>
-          <IconBanner />
-          <Footer />
-        </Route>
-      </Switch>
-      </div> */}
-    </Router>
+    <UserContext.Provider value={{ userState: userState, setUserState: setUserState }}>
+      <Router>
+        <Switch>
+          <Route path="/thankyou" children={<Thankyou />} />
+          <Route path="/admin">
+            <Admin loading={loading} />
+          </Route>
+          <Route path="*">
+            <Routes />
+          </Route>
+        </Switch>
+      </Router>
+    </UserContext.Provider>
   );
 }
 

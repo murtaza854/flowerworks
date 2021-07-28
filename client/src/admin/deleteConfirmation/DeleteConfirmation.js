@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { Typography, Divider, makeStyles, Button } from '@material-ui/core';
 import { Col, Container, Row } from 'react-bootstrap';
-import { userDataObj, baseObj, productObj, addonObj, colorObj, sizeObj, flowerObj, areaObj } from '../../db'
+import { userDataObj, baseObj, productObj, addonObj, colorObj, sizeObj, flowerObj, areaObj, discountObj } from '../../db'
 import TreeView from '@material-ui/lab/TreeView';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -54,6 +54,7 @@ function DeleteConfirmation(props) {
     else if (model === 'sizes') deleteFetch = sizeObj;
     else if (model === 'flowers') deleteFetch = flowerObj;
     else if (model === 'areas') deleteFetch = areaObj;
+    else if (model === 'discounts') deleteFetch = discountObj;
 
     const [modelName, setModelName] = useState('');
     const [selected, setSelected] = useState([]);

@@ -21,6 +21,16 @@ router.get('/TableData', async (req, res) => {
     else res.json({data: bases});
 });
 
+router.get('/get-data', async (req, res) => {
+    const bases = [
+        { name: 'Bouquet', price: 100 },
+        { name: 'Box', price: 200 },
+        { name: 'Basket', price: 300 },
+        { name: 'Acrylic Box', price: 400 },
+    ];
+    res.json({data: bases});
+});
+
 router.post('/add', upload.single('file'), async (req, res) => {
     const file = req.file;
     if (file) {

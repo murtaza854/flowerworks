@@ -8,6 +8,15 @@ router.get('/TableData', async (req, res) => {
     else res.json({data: colors});
 });
 
+router.get('/get-data', async (req, res) => {
+    const colors = [
+        { name: 'Red', price: 100 },
+        { name: 'Blue', price: 200 },
+        { name: 'Green', price: 300 },
+    ];
+    res.json({data: colors});
+});
+
 router.post('/add', async (req, res) => {
     const data = req.body;
     const newColor = new Color({

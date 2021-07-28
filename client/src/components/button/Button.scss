@@ -17,7 +17,22 @@
             color: black;
         }
         &:active {
-            background-color: rgb(65, 65, 65);
+            background-color: rgb(121, 121, 121);
+            color: white;
+        }
+    }
+}
+
+.disabled {
+    div {
+        background-color: rgb(121, 121, 121);
+        color: white;
+        &:hover {
+            background-color: rgb(121, 121, 121);
+            color: white;
+        }
+        &:active {
+            background-color: rgb(121, 121, 121);
             color: white;
         }
     }

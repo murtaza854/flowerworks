@@ -1,0 +1,15 @@
+.confirmation-message {
+    background-color: var(--silver);
+    .icon {
+        text-align: center;
+        .main-content__checkmark {
+            font-size: 8.75rem;
+            color: white;
+            background-color: black;
+            border-radius: 100%;
+            line-height: 9.5rem;
+            width: 10rem;
+            height: 10rem;
+        }
+    }
+}

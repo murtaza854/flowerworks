@@ -8,7 +8,13 @@ function Poster(props) {
             <Row>
                 <Col>
                     <img
-                        src="/images/background.png"
+                        className="hide-991"
+                        src="/images/background.jpg"
+                        alt="Flowers Poster"
+                    />
+                    <img
+                        className="unhide-991"
+                        src="/images/background_small.jpg"
                         alt="Flowers Poster"
                     />
                 </Col>

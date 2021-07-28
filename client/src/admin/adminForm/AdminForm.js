@@ -1,7 +1,7 @@
 import React from 'react';
 import { Divider, Typography, makeStyles } from '@material-ui/core';
 import { Container, Col, Row } from 'react-bootstrap';
-import { userDataObj, baseObj, productObj, addonObj, colorObj, sizeObj, flowerObj, areaObj } from '../../db';
+import { userDataObj, baseObj, productObj, addonObj, colorObj, sizeObj, flowerObj, areaObj, discountObj } from '../../db';
 import { useParams } from 'react-router';
 import './AdminForm.scss';
 
@@ -56,6 +56,7 @@ function AdminForm(props) {
     else if (model === 'sizes') formFetch = sizeObj;
     else if (model === 'flowers') formFetch = flowerObj;
     else if (model === 'areas') formFetch = areaObj;
+    else if (model === 'discounts') formFetch = discountObj;
 
     return (
         <Container fluid className='adminForm'>

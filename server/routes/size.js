@@ -8,6 +8,15 @@ router.get('/TableData', async (req, res) => {
     else res.json({data: sizes});
 });
 
+router.get('/get-data', async (req, res) => {
+    const sizes = [
+        { name: 'small', price: 100 },
+        { name: 'medium', price: 200 },
+        { name: 'large', price: 300 },
+    ];
+    res.json({data: sizes});
+});
+
 router.post('/add', async (req, res) => {
     const data = req.body;
     const newSize = new Size({

@@ -12,3 +12,5 @@ export { default as SmallBanner } from './smallBanner/SmallBanner';
 export { default as RadioBox } from './radioBox/RadioBox';
 export { default as Card } from './card/Card';
 export { default as Poster } from './poster/Poster';
+export { default as Sidebar } from './sidebar/Sidebar';
+export { default as ConfirmationMessage } from './confirmationMessage/ConfirmationMessage'

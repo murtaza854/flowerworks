@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import CheckBoxOutlineBlankOutlinedIcon from '@material-ui/icons/CheckBoxOutlineBlankOutlined';
 import { Radio, FormControlLabel, RadioGroup } from '@material-ui/core';
 import CheckBoxOutlinedIcon from '@material-ui/icons/CheckBoxOutlined';
@@ -8,7 +8,7 @@ import { Button, ParaText, Heading2 } from '../../../../components';
 import './Payment.scss'
 
 function Payment(props) {
-    const theme = createMuiTheme({
+    const theme = createTheme({
         palette: {
             type: 'light',
             primary: {
@@ -68,6 +68,7 @@ function Payment(props) {
                             <Heading2
                                 first="Payment"
                                 bold="details"
+                                link="/"
                                 classes="text-uppercase"
                             />
                             <div className="global-mt-3"></div>

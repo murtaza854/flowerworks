@@ -23,6 +23,9 @@ const createBaseTableData = (data) => {
     return { _id, name, finalPrice, baseName, imagePath };
 }
 
+const startAction = async (obj, selected, setOriginalTableRows, setTableRows) => {
+}
+
 const editObjCheck = (data, value, editObj) => {
     if (editObj) return data.find(obj => obj.name.toLowerCase().trim() === value.toLowerCase().trim() && obj.name !== editObj.name);
     else return data.find(obj => obj.name.toLowerCase().trim() === value.toLowerCase().trim())
@@ -47,7 +50,13 @@ const productObj = {
     addAllowed: true,
     modelName: 'Product',
     ordering: 'name',
+    searchField: 'name',
     rightAllign: [],
+    type: 'enhanced',
+    startAction: startAction,
+    actionOptions: [
+        { label: '', value: '', type: '' }
+    ],
     Form: function(id, classes) {
         let history = useHistory();
 

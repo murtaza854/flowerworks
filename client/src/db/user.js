@@ -7,50 +7,76 @@ import api from '../api';
 import { useHistory } from 'react-router-dom';
 
 const createUserTableData = (data) => {
-    let { _id, firstName, lastName, email, contactNumber, staff, emailVerified, adminApproved } = data;
+    let { _id, firstName, lastName, email, contactNumber, staff, active } = data;
     const name = `${firstName} ${lastName}`
-    return { _id, name, email, contactNumber, staff, emailVerified, adminApproved };
+    return { _id, name, email, contactNumber, staff, active };
 }
 
 const objEmailCheck = (data, value) => {
     return data.find(obj => obj.email.toLowerCase().trim() === value.toLowerCase().trim());
 }
 
+const startAction = async (obj, selected, setOriginalTableRows, setTableRows) => {
+    if (obj.type === 'active') {
+        const rows = [];
+        let active = true;
+        if (obj.value === 'in-active') active = false;
+        const response = await fetch(`${api}/users/set-active`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: active, selected: selected })
+        });
+        const content = await response.json();
+        content.data.forEach(element => {
+          rows.push(createUserTableData(element));
+        });
+        setTableRows(rows);
+        setOriginalTableRows(rows);
+    }
+}
+
 const userDataObj = {
     apiTable: `${api}/users/TableData`,
     deleteApi: [`${api}/users/getByIds`, `${api}/users/delete`],
-    createTableData : createUserTableData,
+    createTableData: createUserTableData,
     headCells: [
         // { id: 'id', numeric: false, disablePadding: true, label: 'ID' },
         { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
         { id: 'email', numeric: false, disablePadding: false, label: 'Email' },
         { id: 'contactNumber', numeric: false, disablePadding: false, label: 'Contact Number' },
         { id: 'staff', numeric: false, disablePadding: false, label: 'Staff' },
-        { id: 'emailVerified', numeric: false, disablePadding: false, label: 'Email Verified' },
-        { id: 'adminApproved', numeric: false, disablePadding: false, label: 'Admin Approved' },
-      ],
-      ManyChild: '',
-      checkboxSelection: '_id',
-      deletePage: 'email',
-      editAllowed: false,
-      deleteAllowed: true,
-      addAllowed: true,
-      modelName: 'User',
-      ordering: 'name',
-      rightAllign: [],
-    Form: function(id, classes) {
+        { id: 'active', numeric: false, disablePadding: false, label: 'Active' },
+    ],
+    ManyChild: '',
+    checkboxSelection: '_id',
+    deletePage: 'email',
+    editAllowed: false,
+    deleteAllowed: true,
+    addAllowed: true,
+    modelName: 'User',
+    ordering: 'name',
+    searchField: 'name',
+    rightAllign: [],
+    type: 'enhanced',
+    startAction: startAction,
+    actionOptions: [
+        { label: '', value: '', type: '' },
+        { label: 'Set active', value: 'active', type: 'active' },
+        { label: 'Set in-active', value: 'in-active', type: 'active' }
+    ],
+    Form: function (id, classes) {
         let history = useHistory();
 
         // const [nameState, setNameState] = useState({name: '', helperText: 'Enter a name Ex. John Doe', error: false});
-        const [firstNameState, setFirstNameState] = useState({name: '', helperText: 'Enter first name Ex. Ahmad', error: false});
-        const [lastNameState, setLastNameState] = useState({name: '', helperText: 'Enter last name Ex. Khan', error: false});
-        const [emailState, setEmailState] = useState({name: '', helperText: 'Enter an email Ex. ahmad@gmail.com', error: false});
-        const [contactNumberState, setContactNumberState] = useState({name: '', helperText: 'Enter an contact number Ex. +92 123 4567890', error: false});
-        const [passwordState, setPasswordState] = useState({name: '', showPassword: false, helperText: 'Enter a password', error: false});
-        const [confirmPasswordState, setConfirmPasswordState] = useState({name: '', showPassword: false, helperText: 'Re-type password', error: false});
+        const [firstNameState, setFirstNameState] = useState({ name: '', helperText: 'Enter first name Ex. Ahmad', error: false });
+        const [lastNameState, setLastNameState] = useState({ name: '', helperText: 'Enter last name Ex. Khan', error: false });
+        const [emailState, setEmailState] = useState({ name: '', helperText: 'Enter an email Ex. ahmad@gmail.com', error: false });
+        const [contactNumberState, setContactNumberState] = useState({ name: '', helperText: 'Enter an contact number Ex. +92 123 4567890', error: false });
+        const [passwordState, setPasswordState] = useState({ name: '', showPassword: false, helperText: 'Enter a password', error: false });
+        const [confirmPasswordState, setConfirmPasswordState] = useState({ name: '', showPassword: false, helperText: 'Re-type password', error: false });
         // const [organizationState, setOrganizationState] = useState({organization: '', helperText: 'Enter an organization name Ex. Dolmen Mall'});
         // const [roleState, setRoleState] = useState({role: '', helperText: 'Please select a role', error: false});
-        const [checkboxes, setCheckboxes] = useState({staff: false, adminApproved: true});
+        const [checkboxes, setCheckboxes] = useState({ staff: false, active: true });
 
         const [usersArray, setUsersArray] = useState([]);
         const [isDisabled, setCanSubmit] = useState(true);
@@ -73,21 +99,23 @@ const userDataObj = {
             setCanSubmit(flag);
         }, [firstNameState, lastNameState, emailState, contactNumberState, passwordState, confirmPasswordState]);
 
-        useEffect(() => {(
-            async () => {
-                const response = await fetch(`${api}/users/TableData`, {
-                    headers: {'Content-Type': 'application/json'},
-                });
-                const content = await response.json();
-                setUsersArray(content.data)
-            })();
+        useEffect(() => {
+            (
+                async () => {
+                    const response = await fetch(`${api}/users/TableData`, {
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    const content = await response.json();
+                    setUsersArray(content.data)
+                })();
         }, []);
 
-        useEffect(() => {(
-            () => {
-                if (confirmPasswordState.name !== passwordState.name) setConfirmPasswordState(prevState => ({ ...prevState, helperText: 'Password does not match', error: true }));
-                else setConfirmPasswordState(prevState => ({ ...prevState, helperText: 'Re-type password', error: false }));
-            })();
+        useEffect(() => {
+            (
+                () => {
+                    if (confirmPasswordState.name !== passwordState.name) setConfirmPasswordState(prevState => ({ ...prevState, helperText: 'Password does not match', error: true }));
+                    else setConfirmPasswordState(prevState => ({ ...prevState, helperText: 'Re-type password', error: false }));
+                })();
         }, [confirmPasswordState.name, passwordState.name]);
 
         function changeFirstNameState(event) {
@@ -118,9 +146,9 @@ const userDataObj = {
         };
         function changePasswordState(event) {
             const { value } = event.target;
-            const passwReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+            const passwReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_])(?=.{8,})/;
             setPasswordState(prevState => ({ ...prevState, name: value }));
-            if (!value.match(passwReg)) setPasswordState(prevState => ({ ...prevState, helperText: 'Password must contain atleast 1 lowercase alhpabetical character, atleast 1 uppercase alhpabetical character, atleast 1 numericical character, 1 special character and must be of atleast 8 characters', error: true }));
+            if (!value.match(passwReg)) setPasswordState(prevState => ({ ...prevState, helperText: 'Password must contain atleast 1 lowercase alhpabetical character, atleast 1 uppercase alhpabetical character, atleast 1 numerical character, 1 special character and must be of atleast 8 characters', error: true }));
             else setPasswordState(prevState => ({ ...prevState, helperText: 'Enter a password', error: false }));
         };
         function changeConfirmPasswordState(event) {
@@ -135,20 +163,20 @@ const userDataObj = {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({firstName: firstNameState.name, lastName: lastNameState.name, email: emailState.name, contactNumber: contactNumberState.name, password: passwordState.name, staff: checkboxes.staff, adminApproved: checkboxes.adminApproved}),
+                body: JSON.stringify({ firstName: firstNameState.name, lastName: lastNameState.name, email: emailState.name, contactNumber: contactNumberState.name, password: passwordState.name, staff: checkboxes.staff, active: checkboxes.active }),
             });
             // const content = await response.json();
             if (pressedBtn === 1) {
                 // history.push('/admin/users');
             }
             else {
-                setFirstNameState({name: '', helperText: 'Enter first name Ex. Ahmad', error: false});
-                setLastNameState({name: '', helperText: 'Enter last name Ex. Khan', error: false});
-                setEmailState({email: '', helperText: 'Enter an email Ex. ahmad@gmail.com', error: false});
-                setContactNumberState({contactNumber: '', helperText: 'Enter an contact number Ex. +92 123 4567890', error: false});
-                setPasswordState({password: '', showPassword: false, helperText: 'Enter a password', error: false});
-                setConfirmPasswordState({confirmPassowrd: '', showPassword: false, helperText: 'Re-type password', error: false});
-                setCheckboxes({staff: false, adminApproved: false});
+                setFirstNameState({ name: '', helperText: 'Enter first name Ex. Ahmad', error: false });
+                setLastNameState({ name: '', helperText: 'Enter last name Ex. Khan', error: false });
+                setEmailState({ email: '', helperText: 'Enter an email Ex. ahmad@gmail.com', error: false });
+                setContactNumberState({ contactNumber: '', helperText: 'Enter an contact number Ex. +92 123 4567890', error: false });
+                setPasswordState({ password: '', showPassword: false, helperText: 'Enter a password', error: false });
+                setConfirmPasswordState({ confirmPassowrd: '', showPassword: false, helperText: 'Re-type password', error: false });
+                setCheckboxes({ staff: false, active: false });
                 history.push('/admin/users/add');
             }
         };
@@ -163,10 +191,10 @@ const userDataObj = {
         const handleStaffCheckbox = () => {
             setCheckboxes(prevState => ({ ...prevState, staff: !checkboxes.staff }));
         };
-        const handleAdminApprovedCheckbox = () => {
-            setCheckboxes(prevState => ({ ...prevState, adminApproved: !checkboxes.adminApproved }));
+        const handleActiveCheckbox = () => {
+            setCheckboxes(prevState => ({ ...prevState, active: !checkboxes.active }));
         };
-    
+
         const handleMouseDownPassword = (event) => {
             event.preventDefault();
         };
@@ -177,9 +205,9 @@ const userDataObj = {
                 <Row className={classes.rowGap}>
                     <Form.Group as={Col} md={6} controlId="firstName">
                         <FormControl className={classes.formControl}>
-                            <InputLabel error={firstNameState.error} color="secondary"  htmlFor="firstName">First Name</InputLabel>
+                            <InputLabel error={firstNameState.error} color="secondary" htmlFor="firstName">First Name</InputLabel>
                             <Input
-                                color="secondary" 
+                                color="secondary"
                                 autoComplete="none"
                                 value={firstNameState.name}
                                 type="text"
@@ -195,9 +223,9 @@ const userDataObj = {
                     </Form.Group>
                     <Form.Group as={Col} md={6} controlId="lastName">
                         <FormControl className={classes.formControl}>
-                            <InputLabel error={lastNameState.error} color="secondary"  htmlFor="lastName">Last Name</InputLabel>
+                            <InputLabel error={lastNameState.error} color="secondary" htmlFor="lastName">Last Name</InputLabel>
                             <Input
-                                color="secondary" 
+                                color="secondary"
                                 autoComplete="none"
                                 value={lastNameState.name}
                                 type="text"
@@ -215,7 +243,7 @@ const userDataObj = {
                 <Row className={classes.rowGap}>
                     <Form.Group as={Col} md={6} controlId="formGridEmail">
                         <FormControl className={classes.formControl}>
-                            <InputLabel error={emailState.error} color="secondary"  htmlFor="email">Email</InputLabel>
+                            <InputLabel error={emailState.error} color="secondary" htmlFor="email">Email</InputLabel>
                             <Input
                                 color="secondary"
                                 autoComplete="none"
@@ -266,15 +294,15 @@ const userDataObj = {
                                 onBlur={changePasswordState}
                                 name="password"
                                 endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={handleClickShowPassword}
-                                    onMouseDown={handleMouseDownPassword}
-                                    >
-                                    {passwordState.showPassword ? <Visibility /> : <VisibilityOff />}
-                                    </IconButton>
-                                </InputAdornment>
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                        >
+                                            {passwordState.showPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment>
                                 }
                             />
                             <FormHelperText error={passwordState.error} id="password-helper">{passwordState.helperText}</FormHelperText>
@@ -294,15 +322,15 @@ const userDataObj = {
                                 name="confirmPassowrd"
                                 error={confirmPasswordState.error}
                                 endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={handleClickShowPassword1}
-                                    onMouseDown={handleMouseDownPassword}
-                                    >
-                                    {confirmPasswordState.showPassword ? <Visibility /> : <VisibilityOff />}
-                                    </IconButton>
-                                </InputAdornment>
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword1}
+                                            onMouseDown={handleMouseDownPassword}
+                                        >
+                                            {confirmPasswordState.showPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment>
                                 }
                             />
                             <FormHelperText error={confirmPasswordState.error} id="confirmPassowrd-helper">{confirmPasswordState.helperText}</FormHelperText>
@@ -319,23 +347,23 @@ const userDataObj = {
                             label="Staff"
                         />
                     </Form.Group>
-                    <Form.Group as={Col} md={6} controlId="adminApproved">
+                    <Form.Group as={Col} md={6} controlId="active">
                         <FormControlLabel
-                            control={<Checkbox checked={checkboxes.adminApproved} onChange={handleAdminApprovedCheckbox} name="adminApproved" />}
-                            label="Admin Approved"
+                            control={<Checkbox checked={checkboxes.active} onChange={handleActiveCheckbox} name="active" />}
+                            label="Active"
                         />
                     </Form.Group>
                 </Row>
                 <Row className={classes.rowGap}>
                 </Row>
             </fieldset>
-            <input 
-                type="text" 
-                autoComplete="on" 
-                value="" 
-                style={{display: 'none'}} 
+            <input
+                type="text"
+                autoComplete="on"
+                value=""
+                style={{ display: 'none' }}
                 readOnly={true}
-                />
+            />
             <Button className={classes.button} onClick={_ => setPressedBtn(1)} disabled={isDisabled} type="submit" variant="contained" color="primary">
                 Save
             </Button>

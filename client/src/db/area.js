@@ -14,6 +14,9 @@ const editObjCheck = (data, value, editObj) => {
     else return data.find(obj => obj.name.toLowerCase().trim() === value.toLowerCase().trim())
 }
 
+const startAction = async (obj, selected, setOriginalTableRows, setTableRows) => {
+}
+
 const areaObj = {
     apiTable: `${api}/areas/TableData`,
     deleteApi: [`${api}/areas/getByIds`, `${api}/areas/delete`],
@@ -30,7 +33,13 @@ const areaObj = {
     addAllowed: true,
     modelName: 'Area',
     ordering: 'name',
+    searchField: 'name',
     rightAllign: [],
+    type: 'enhanced',
+    startAction: startAction,
+    actionOptions: [
+        { label: '', value: '', type: '' }
+    ],
     Form: function(id, classes) {
         let history = useHistory();
 

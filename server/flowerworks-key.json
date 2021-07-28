@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "flowerworks-2953a",
+  "private_key_id": "ebd5b004d84e710db14eca7c8915594081cb8bfd",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCLxKPNzGKI092e\nKtoUf/e3Se/aaHTs8Ka1GxvLccSIK4HOu0MoDQE/AmpulkltxkGQSWPLSwpsTkCR\nmIrBqZSRN+eYEPfrsOBlK8c0Kv9Ern9VEbK3LgyLODmEkS1XEs5BIpu+bB+6Gxbk\nvuuGlPZyquAAnKkXcW0EmPgaLkV8sMv7TtFJwpjQ0zECILy0keSLkTAZcE8UL+ml\n+4j1R3YZqCGwU4y2oHZOI7tN94shG4ZJWPugFdLItIroCX4ILI8+FRQ8l9JvzFFD\nZ1AlavLxun/xShXgH5h87uxBFg7VYLEKAx6ry1KVgyGZ8M5GnCOR43OBtlHfQvGw\nTOQ54swjAgMBAAECggEAOx5PLObVDMwUsuisOryQAmqXNfo17tyxnuwa+xghiXlh\nnBhwRPoPO2AhtaoC4BhaNhYczGnuvDXzMMJlepnome4cGyGeRAaaO6DjTwka1Sm7\n+TcVsU6chqyfA5hGpcxyCnIBj297kgQQUGwDAndysLjfK9MX4K8c7jNnyeclhCJB\n4TzFowzMcHRLNACnNeDMxtkLkUbpmB3GYnLn+yeRYtQDmpH06nwtO8afZCooffG6\nKs4rD+iUWp4lucP3e/wnWv6vhJ/VOCmezf+p7POCVvr5GvbIeReD0yLJFHSlGLhT\n6gosk+rsmL96JFs4MOS4JGcL/M7dYg1UiOfSspwupQKBgQDDnbGCRfCZghHDiDzZ\nC6719LtcEfbiBwgYDhY3+NPRf7avrLueA3RoTb21yXcS2qSl35jGVpYt18CBm1As\n3b08901GYYO0rfNR3AITta5tcfw0SjQHxR4niA6MYD8l/DIGSOPmR8O0al2enCHy\n1nhInyU/AiJ1UG+JGzmDMRduPwKBgQC26aOw9EYRakwEN401DEA0WW7gc7Rf296M\nQlp+7z2UphViWJQSgmHrsZ2enQxRuiw865LuEgNe2ss0fPmnwQP75SgOZYlNF2qa\nLp5jSYgZxuV+LG6VMmS7iZBypqECPcoftUuwxyUT1wFgQDDYXJqp7EDtmP+XV4+0\no9R6bA7xHQKBgQCZmUU8ybY2k09nfZ5pvybOsjA8B08YA/VzDfycTqHkKqhEIRng\n5U2OaRzBlUQOZehK5tuLQYoCzRq3qkC2OhbRvE3NKdzFDqG0cVCgMVSZU5t5Y5qf\nT0RyPf9OcnSjWvfcv3dT5p3hGHQSiv6NM6KXQ393jjGIdHRf8CSkwvNm+QKBgFrW\nj0+bEI0nkBbsC7mTmvMkkxbu/1430D8x2MV/RMLk9GvB9891ZvHpZJDYB70yyzN5\n/p8y3O+nkxE/G7E+/x6DALCdpmFdxrhJfKlsZCYBDAnsQQLhYvtr5wu5Su7VBuNW\nYv+o9vXyaiGF33wkCT9oMBqPSCe9+YVJc4VU0trVAoGAd531kTrMWJ3GfHG2HWSH\nxZKVDZakAQvWZVuco/q5B8E/Stn9nkZU9lG0ntnqn2rLESHDvFpdiWQWkde34Yd0\nPu8BKB3sLej8Mc7uvQBf+X4xRyctKddYoBt9iS72DV9WGwnauGZMcObe3KJaJRYa\nX92sUz/VKVPA1yDUCVfuakw=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-60wcn@flowerworks-2953a.iam.gserviceaccount.com",
+  "client_id": "107025911668580427082",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-60wcn%40flowerworks-2953a.iam.gserviceaccount.com"
+}

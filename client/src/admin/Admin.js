@@ -1,87 +1,58 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Login, AdminLayout } from '../admin';
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-import api from '../api';
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import UserContext from '../authenticatedUser';
 
 function Admin(props) {
-    const [token, setToken] = useState("loading");
-    const [darkState, setDarkState] = useState(false);
-    const darkTheme = createMuiTheme({
-        palette: {
-            type: "dark",
-            primary: {
-              main: '#000000',
-            },
-            secondary: {
-              main: '#f9f9f9',
-            },
-            error: {
-              main: '#ff1500',
-            },
-            typography: {
-            fontFamily: 'Raleway',
-            },
-          },
-    });
-    const lightTheme = createMuiTheme({
-        palette: {
-            type: "light",
-            primary: {
-              main: '#f9f9f9',
-            },
-            secondary: {
-              main: '#000000',
-            },
-            error: {
-              main: '#ff1500',
-            },
-            typography: {
-            fontFamily: 'Raleway',
-            },
-          },
-    });
-    const currentTheme = darkState ? darkTheme : lightTheme;
+  const [darkState, setDarkState] = useState(false);
+  const user = useContext(UserContext);
+  const darkTheme = createTheme({
+    palette: {
+      type: "dark",
+      primary: {
+        main: '#757575',
+      },
+      secondary: {
+        main: '#000000',
+      },
+      error: {
+        main: '#c31200',
+      },
+      typography: {
+        fontFamily: 'Raleway',
+      },
+    },
+  });
+  const lightTheme = createTheme({
+    palette: {
+      type: "light",
+      primary: {
+        main: '#000000',
+      },
+      secondary: {
+        main: '#757575',
+      },
+      error: {
+        main: '#c31200',
+      },
+      typography: {
+        fontFamily: 'Raleway',
+      },
+    },
+  });
+  const currentTheme = darkState ? darkTheme : lightTheme;
 
-    useEffect(() => {(
-        async () => {
-            if (token !== true) {
-                const response = await fetch(`${api}/users/loggedIn`, {
-                  headers: {'Content-Type': 'application/json'},
-                  credentials: 'include',
-                  withCredentials: true,
-                });
-                const content = await response.json();
-                setToken(content.loggedIn);
-            }
-          // setDarkState(content.darkState);
-          // const response1 = await fetch('http://localhost:4000/api/get-darktheme', {
-          //   method: 'GET',
-          //   headers: {'Content-Type': 'application/json'},
-          //   credentials: 'include',
-          //   withCredentials: true,
-          // });
-          // const content1 = await response1.json();
-          // console.log(Boolean(content1.darktheme))
-          // setDarkState(Boolean(content1.darktheme));
-        })();
-    });
+  if (props.loading) return <div></div>
 
-    const pathArray = window.location.pathname.split('/');
-
-    if (token === 'loading') return <div></div>;
-    if (pathArray.length >= 2 && pathArray[1] === 'admin' && !token) {
-        return (<Login setToken={setToken} title="Flowerworks: Admin Login" /> );
-    }
-
-    return (
-        <ThemeProvider theme={currentTheme}>
-              {!token ? (
-                <Login setToken={setToken} title="Flowerworks: Admin Login" />
-                ) : (
-                <AdminLayout darkState={darkState} setDarkState={setDarkState} setToken={setToken} title="Flowerworks: Dashboard" />
-               )}
-        </ThemeProvider>
-    );
+  return (
+    <ThemeProvider theme={currentTheme}>
+      {!user.userState ? (
+        <Login user={user} title="Flowerworks: Admin Login" />
+      ) : (
+        <AdminLayout user={user} darkState={darkState} setDarkState={setDarkState} title="Flowerworks: Dashboard" />
+      )}
+    </ThemeProvider>
+  );
 }
 
 export default Admin;

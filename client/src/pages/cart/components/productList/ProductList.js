@@ -39,25 +39,78 @@ function ProductList(props) {
             for (const key in cart.cartObj.data) {
                 if (Object.hasOwnProperty.call(cart.cartObj.data, key)) {
                     const element = cart.cartObj.data[key];
+                    let paraText = <div>
+                        <Heading3
+                            bold="Description:"
+                            classes="text-uppercase"
+                        />
+                        <ParaText
+                            text={element.item.description}
+                        />
+                    </div>
+                    if (element.type === 'diy') {
+                        const flowers = element.item.flowers.map((value, index) => {
+                            return value.name;
+                        }).join(', ');
+                        const addons = element.item.addons.map((value, index) => {
+                            return value.name;
+                        }).join(', ');
+                        paraText = (
+                            <div>
+                                <ParaText
+                                    bold="Size:"
+                                    text={element.item.size}
+                                    classes="text-capatalize margin-bottom-0"
+                                />
+                                <ParaText
+                                    bold="Base:"
+                                    text={element.item.base}
+                                    classes="text-capatalize margin-bottom-0"
+                                />
+                                <ParaText
+                                    bold="Color:"
+                                    text={element.item.color}
+                                    classes="text-capatalize margin-bottom-0"
+                                />
+                                <ParaText
+                                    bold="Flowers:"
+                                    text={flowers}
+                                    classes="text-capatalize margin-bottom-0"
+                                />
+                                {
+                                    element.item.addons.length === 0 ? (
+                                        <ParaText
+                                            bold="Addons:"
+                                            text="No Addons"
+                                            classes="text-capatalize"
+                                        />
+                                    ) : (
+                                        <ParaText
+                                            bold="Addons:"
+                                            text={addons}
+                                            classes="text-capatalize"
+                                        />
+                                    )
+                                }
+                            </div>
+                        )
+                    }
                     content.push(
                         <Row key={key} className="product-row">
-                            <Col md={2}>
+                            <div className="global-mt-2 display-992" />
+                            <Col lg={3}>
                                 <img src={element.item.imagePath} alt={element.item.name} />
                             </Col>
-                            <Col md={5}>
+                            <div className="global-mt-3 display-992" />
+                            <Col lg={5}>
                                 <Heading2
+                                    link="/"
                                     bold={element.item.name}
                                     classes="text-uppercase"
                                 />
-                                <Heading3
-                                    bold="Description:"
-                                    classes="text-uppercase"
-                                />
-                                <ParaText
-                                    text={element.item.description}
-                                />
+                                {paraText}
                             </Col>
-                            <Col md={1}>
+                            <Col lg={1}>
                                 <div className="center-relative">
                                     <input value={element.count} type="text" readOnly={true} />
                                     <div className="add-remove-icons horizontal-center-relative">
@@ -66,6 +119,7 @@ function ProductList(props) {
                                     </div>
                                 </div>
                             </Col>
+                            <div className="global-mt-3 display-992" />
                             <Col className="align-middle">
                                 <div className="center-relative">
                                     <Heading1
@@ -74,7 +128,8 @@ function ProductList(props) {
                                     />
                                 </div>
                             </Col>
-                            {/* <Col md={1}>
+                            <div className="global-mt-2 display-992" />
+                            {/* <Col lg={1}>
                                 <i className="fa fa-times center-relative" aria-hidden="true"></i>
                             </Col> */}
                         </Row>
@@ -95,7 +150,7 @@ function ProductList(props) {
             <div className="global-mt-3" />
             <Row>
                 <Heading1
-                    bold="Total: "
+                    bold="Total Cost: "
                     second={`PKR.${cart.cartObj.cartTotalPrice}`}
                     classes="text-uppercase text-center"
                 />
@@ -103,7 +158,17 @@ function ProductList(props) {
             <div className="global-mt-3" />
             <Row>
                 <div className="horizontal-center-margin">
-                    <Button cartForm={2} setActive={props.setActive} setActiveCompClass={props.setActiveCompClass} to="/" text="Proceed" classes="text-uppercase" />
+                    <Button
+                        setArrowLeft={props.setArrowLeft}
+                        setArrowRight={props.setArrowRight}
+
+                        cartForm={2}
+                        setActive={props.setActive}
+                        setActiveCompClass={props.setActiveCompClass}
+                        to="/"
+                        text="Proceed"
+                        classes="text-uppercase"
+                    />
                 </div>
             </Row>
         </Container>

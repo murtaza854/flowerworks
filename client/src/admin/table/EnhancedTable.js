@@ -9,7 +9,7 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
-import { userDataObj, baseObj, productObj, addonObj, colorObj, flowerObj, sizeObj, areaObj } from '../../db'
+import { userDataObj, baseObj, productObj, addonObj, colorObj, flowerObj, sizeObj, areaObj, orderObj, discountObj } from '../../db';
 import IconButton from '@material-ui/core/IconButton';
 import Collapse from '@material-ui/core/Collapse';
 // import Button from '@material-ui/core/Button';
@@ -17,10 +17,18 @@ import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/lab/Alert';
 import CheckIcon from '@material-ui/icons/Check';
 import {
-    useLocation,
+  useLocation,
 } from "react-router-dom";
 import { EnhancedTableHead, EnhancedTableToolbar } from '../components'
 import { useParams } from 'react-router';
+
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import TableHead from '@material-ui/core/TableHead';
+import Box from '@material-ui/core/Box';
+import { Row, Col } from 'react-bootstrap';
+import { Container } from '@material-ui/core';
+import './EnhancedTable.scss'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -116,6 +124,8 @@ export default function EnhancedTable(props) {
   else if (model === 'sizes') tableFetch = sizeObj;
   else if (model === 'flowers') tableFetch = flowerObj;
   else if (model === 'areas') tableFetch = areaObj;
+  else if (model === 'orders') tableFetch = orderObj;
+  else if (model === 'discounts') tableFetch = discountObj;
 
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
@@ -123,47 +133,61 @@ export default function EnhancedTable(props) {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [originalTableRows, setOriginalTableRows] = React.useState([]);
   const [tableRows, setTableRows] = React.useState([]);
   const [alertOpen, setAlertOpen] = React.useState(false);
   const [alertText, setAlertText] = React.useState('');
 
+  const [open, setOpen] = React.useState([]);
+  const [searchState, setSearchState] = React.useState('');
+
   useEffect(() => {
-      try {
-        if (location.state.content.data === 'success') {
-          if (location.state.length === 1) {
-            setAlertText('1 element has been deleted.');
-          } else {
-            setAlertText(`${location.state.length} elements have been deleted.`);
-          }
-          setAlertOpen(true);
-          setTimeout(() => {
-            setAlertOpen(false);
-          }, 5000);
+    try {
+      if (location.state.content.data === 'success') {
+        if (location.state.length === 1) {
+          setAlertText('1 element has been deleted.');
+        } else {
+          setAlertText(`${location.state.length} elements have been deleted.`);
         }
-      } catch (error) {
-        
+        setAlertOpen(true);
+        setTimeout(() => {
+          setAlertOpen(false);
+        }, 5000);
       }
+    } catch (error) {
+
+    }
   }, [location]);
 
   const apiURL = tableFetch.apiTable;
   const createTableData = tableFetch.createTableData;
 
-  useEffect(() => {(
-    async () => {
-      // if (!reload) {
+  useEffect(() => {
+    (
+      async () => {
+        // if (!reload) {
         const rows = [];
         const response = await fetch(apiURL, {
           method: 'GET',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
         });
         const content = await response.json();
         content.data.forEach(element => {
           rows.push(createTableData(element));
         });
         setTableRows(rows);
-      // }
-    })();
+        setOriginalTableRows(rows);
+        const openRows = new Array(rows.length).fill(false);
+        setOpen(openRows);
+        // }
+      })();
   }, [apiURL, createTableData]);
+
+  const handleSetOpen = index => {
+    const openRows = [...open];
+    openRows[index] = !openRows[index];
+    setOpen(openRows)
+  }
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -179,6 +203,14 @@ export default function EnhancedTable(props) {
     }
     setSelected([]);
   };
+  const searchTableRows = event => {
+    const { value } = event.target;
+    setSearchState(value);
+    const rows = originalTableRows.filter(obj => obj[`${tableFetch.searchField}`].toLowerCase().trim().includes(value.toLowerCase().trim()));
+    setTableRows(rows);
+    const openRows = new Array(rows.length).fill(false);
+    setOpen(openRows);
+  }
 
   const handleClick = (event, value) => {
     const selectedIndex = selected.indexOf(value);
@@ -213,32 +245,37 @@ export default function EnhancedTable(props) {
   return (
     <div id='data' className={classes.root}>
       <div className={classes.alert}>
-      <Collapse in={alertOpen}>
-        <Alert
-          action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setAlertOpen(false);
-              }}
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-          }
-        >
-          {alertText}
-        </Alert>
-      </Collapse>
-    </div>
-
+        <Collapse in={alertOpen}>
+          <Alert
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setAlertOpen(false);
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            {alertText}
+          </Alert>
+        </Collapse>
+      </div>
       <Paper className={classes.paper}>
         <EnhancedTableToolbar
           modelName={tableFetch.modelName}
+          searchTableRows={searchTableRows}
+          searchState={searchState}
           editAllowed={tableFetch.editAllowed}
           deleteAllowed={tableFetch.deleteAllowed}
           addAllowed={tableFetch.addAllowed}
+          setOriginalTableRows={setOriginalTableRows}
+          setTableRows={setTableRows}
+          startAction={tableFetch.startAction}
+          actionOptions={tableFetch.actionOptions}
           selected={selected} />
         <TableContainer>
           <Table
@@ -255,6 +292,7 @@ export default function EnhancedTable(props) {
               onRequestSort={handleRequestSort}
               rowCount={tableRows.length}
               headCells={tableFetch.headCells}
+              tableType={tableFetch.type}
             />
             <TableBody>
               {stableSort(tableRows, getComparator(order, orderBy))
@@ -273,12 +311,13 @@ export default function EnhancedTable(props) {
                   // ]
                   const tableRow = [];
                   let c = 0;
+                  let recieptData = null;
                   for (const key in row) {
                     let textPosition = '';
                     if (tableFetch.rightAllign.includes(key)) textPosition = 'right';
                     if (key === '_id') {
                       tableRow.push(
-                        <TableCell style={{display: 'none'}} key={c}>{row[key]}</TableCell>
+                        <TableCell style={{ display: 'none' }} key={c}>{row[key]}</TableCell>
                       );
                     } else if (key === 'name') {
                       tableRow.push(
@@ -300,53 +339,263 @@ export default function EnhancedTable(props) {
                       tableRow.push(
                         <TableCell key={c}><CheckIcon className={classes.checkIcon} color="primary" /></TableCell>
                       );
+                    } else if (typeof row[key] === "object") {
+                      recieptData = row[key];
                     } else {
                       tableRow.push(
-                        <TableCell style={{textAlign: textPosition}} key={c}>{row[key]}</TableCell>
+                        <TableCell style={{ textAlign: textPosition }} key={c}>{row[key]}</TableCell>
                       );
                     }
                     c += 1;
                   }
-                  // if (flag === false) return <div></div>
+                  // console.log(recieptData.items);
+                  const subTotalPrices = [];
+                  if (tableFetch.type === 'collapse' && recieptData) {
+                    var dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+                    var orderDate = new Date(recieptData.orderDate).toLocaleDateString('en-GB', dateOptions);
+                    var orderRows = [];
+                    let rowIndex = 1;
+                    let discountPercentageNotBill = 0;
+                    if (recieptData.discount) {
+                      discountPercentageNotBill = recieptData.discount.discountPercentage;
+                    }
+                    for (const key in recieptData.items) {
+                      if (Object.hasOwnProperty.call(recieptData.items, key)) {
+                        const value = recieptData.items[key];
+                        let discountedPriceHTML = <></>;
+                        let subtotal = 0;
+                        let classLine = '';
+                        if (value.type === 'diy' && recieptData.discount && recieptData.discount.type === 'DIY') {
+                          let newPrice = ((100 - discountPercentageNotBill) / 100) * value.item.price;
+                          subtotal = newPrice * value.count
+                          discountedPriceHTML = <><br /><span style={{ color: 'rgb(177, 0, 0)' }}>{newPrice}</span> ({discountPercentageNotBill}% off)</>
+                          classLine = 'line-through';
+                        } else if (value.type === 'product' && recieptData.discount && recieptData.discount.type === 'Product') {
+                          const discObj = recieptData.discount.products.find(prod => value.item.name === prod.item.name);
+                          // console.log(value)
+                          if (discObj) {
+                            console.log(discObj)
+                            let newPrice = ((100 - discObj.discountPercentage) / 100) * value.item.price;
+                            subtotal = newPrice * value.count
+                            discountedPriceHTML = <><br /><span style={{ color: 'rgb(177, 0, 0)' }}>{newPrice}</span> ({discObj.discountPercentage}% off)</>
+                            classLine = 'line-through';
+                          } else subtotal = value.totalPrice;
+                        } else subtotal = value.totalPrice;
+                        subTotalPrices.push(subtotal);
+                        let paraText = <TableCell className="reciept-table-cell table-cell-description">{value.item.description}
+                        </TableCell>
+                        if (value.type === 'diy') {
+                          const flowers = value.item.flowers.map((element, index) => {
+                            return element.name;
+                          }).join(', ');
+                          const addons = value.item.addons.map((element, index) => {
+                            return element.name;
+                          }).join(', ');
+                          paraText = (
+                            <TableCell className="reciept-table-cell table-cell-description text-capatalize margin-bottom-0">
+                              <p><strong>Size: </strong>{value.item.size}</p>
+                              <p><strong>Base: </strong>{value.item.base}</p>
+                              <p><strong>Color: </strong>{value.item.color}</p>
+                              <p><strong>Flowers: </strong>{flowers}</p>
+                              {
+                                value.item.addons.length === 0 ? (
+                                  <p><strong>Addons: </strong>No Addons</p>
+                                ) : (
+                                  <p><strong>Addons: </strong>{addons}</p>
+                                )
+                              }
+                            </TableCell>
+                          )
+                        }
+                        orderRows.push(
+                          <TableRow key={key}>
+                            <TableCell className="reciept-table-cell table-cell-no" component="th" scope="row" align="right">
+                              {rowIndex}
+                            </TableCell>
+                            <TableCell className="reciept-table-cell table-cell-name">{value.item.name}</TableCell>
+                            {paraText}
+                            <TableCell className="reciept-table-cell table-cell-price" align="right">
+                              <span className={classLine}>{value.item.price}</span>{discountedPriceHTML}
+                            </TableCell>
+                            <TableCell className="reciept-table-cell table-cell-qty" align="right">{value.count}</TableCell>
+                            <TableCell className="reciept-table-cell table-cell-total-price" align="right">{subtotal}</TableCell>
+                          </TableRow>
+                        )
+                        rowIndex += 1;
+                      }
+                    }
+                  }
+                  const finalSubtotalPrice = subTotalPrices.reduce((a, b) => a + b, 0);
+                  let discountPercentage = 0;
+                  if (recieptData && recieptData.discount && recieptData.discount.type === 'Bill') {
+                    discountPercentage = recieptData.discount.discountPercentage;
+                  }
                   return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row[tableFetch['checkboxSelection']])}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
+                    <React.Fragment
                       key={row[tableFetch['checkboxSelection']]}
-                      selected={isItemSelected}
                     >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ 'aria-labelledby': labelId }}
-                        />
-                      </TableCell>
-                      {tableRow}
-                      {/* {tableRow123.map((value, index) => {
-                        console.log(index)
-                        return <TableCell key={index}>{value}</TableCell>
-                        // return value;
-                      })} */}
-                      {/* {tableRow123.map(function (i) {
-                        return i;
-                      })} */}
-                      {/* {tableRow123[0]}
-                      {tableRow123[1]}
-                      {tableRow123[2]}
-                      {tableRow123[3]}
-                      {tableRow123[4]}
-                      {tableRow123[5]} */}
-                      {/* <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="right">{row.calories}</TableCell>
-                      <TableCell align="right">{row.fat}</TableCell>
-                      <TableCell align="right">{row.carbs}</TableCell>
-                      <TableCell align="right">{row.protein}</TableCell> */}
-                    </TableRow>
+                      {
+                        tableFetch.type !== 'collapse' ? (
+                          <TableRow
+                            hover
+                            onClick={(event) => handleClick(event, row[tableFetch['checkboxSelection']])}
+                            role="checkbox"
+                            aria-checked={isItemSelected}
+                            tabIndex={-1}
+                            selected={isItemSelected}
+                          >
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                checked={isItemSelected}
+                                inputProps={{ 'aria-labelledby': labelId }}
+                              />
+                            </TableCell>
+                            {tableRow}
+                          </TableRow>
+                        ) : (
+                          <>
+                            {
+                              recieptData !== null ? (
+                                <>
+                                  <TableRow
+                                    aria-checked={isItemSelected}
+                                    tabIndex={-1}
+                                    selected={isItemSelected}
+                                  >
+                                    <TableCell padding="checkbox">
+                                      <Checkbox
+                                        onClick={(event) => handleClick(event, row[tableFetch['checkboxSelection']])}
+                                        checked={isItemSelected}
+                                        inputProps={{ 'aria-labelledby': labelId }}
+                                      />
+                                    </TableCell>
+                                    {tableRow}
+                                    <TableCell>
+                                      <IconButton aria-label="expand row" size="small" onClick={() => handleSetOpen(index)}>
+                                        {open[index] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                                      </IconButton>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                                      <Collapse in={open[index]} timeout="auto" unmountOnExit>
+                                        <Box className="order-container">
+                                          <Container>
+                                            <Row className="justify-content-between">
+                                              <Col md={4}>
+                                                <p className="order-no">
+                                                  Order No. {recieptData.orderNumber}
+                                                </p>
+                                                <p className="order-date">
+                                                  Order Date: {orderDate}
+                                                </p>
+                                              </Col>
+                                              <Col md={4}>
+                                                <p className="order-no">
+                                                  {recieptData.status}
+                                                </p>
+                                                <p className="order-date">
+                                                  Payment method: {recieptData.paymentMethod}
+                                                </p>
+                                              </Col>
+                                            </Row>
+                                            <Row className="order-contact justify-content-between">
+                                              <Col md={4}>
+                                                <p>
+                                                  {recieptData.firstName} {recieptData.lastName}
+                                                </p>
+                                                <p>
+                                                  {recieptData.email}
+                                                </p>
+                                                <p>
+                                                  {recieptData.phoneNumber}
+                                                </p>
+                                                <br />
+                                                <p>
+                                                  <strong>Delivery Date:</strong>
+                                                </p>
+                                                <p>
+                                                  {recieptData.deliveryDate}
+                                                </p>
+                                              </Col>
+                                              <Col md={4}>
+                                                <p>
+                                                  {recieptData.firstName1} {recieptData.lastName1}
+                                                </p>
+                                                <p>
+                                                  {recieptData.email1}
+                                                </p>
+                                                <p>
+                                                  {recieptData.phoneNumber1}
+                                                </p>
+                                                <p>
+                                                  {recieptData.addressLine1}
+                                                </p>
+                                                <p>
+                                                  {recieptData.addressLine2}
+                                                </p>
+                                                <p>
+                                                  Near {recieptData.landmark}
+                                                </p>
+                                                <p>
+                                                  {recieptData.area.name}
+                                                </p>
+                                              </Col>
+                                            </Row>
+                                            <Table size="small" aria-label="purchases">
+                                              <TableHead>
+                                                <TableRow>
+                                                  <TableCell className="reciept-table-cell table-cell-no" align="right">No.</TableCell>
+                                                  <TableCell className="reciept-table-cell table-cell-name">Name</TableCell>
+                                                  <TableCell className="reciept-table-cell table-cell-description">Description</TableCell>
+                                                  <TableCell className="reciept-table-cell table-cell-price" align="right">Price</TableCell>
+                                                  <TableCell className="reciept-table-cell table-cell-qty" align="right">Quantity</TableCell>
+                                                  <TableCell className="reciept-table-cell table-cell-total-price" align="right">Sub-Total</TableCell>
+                                                </TableRow>
+                                              </TableHead>
+                                              <TableBody>
+                                                {orderRows}
+                                                <TableRow>
+                                                  <TableCell rowSpan={4} />
+                                                  <TableCell rowSpan={4} />
+                                                  <TableCell rowSpan={4} />
+                                                  <TableCell colSpan={2}>Sub-Total</TableCell>
+                                                  <TableCell align="right">{finalSubtotalPrice}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                  <TableCell colSpan={2}>Discount (%)</TableCell>
+                                                  <TableCell align="right">{discountPercentage}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                  <TableCell colSpan={2}>Delivery Fee</TableCell>
+                                                  <TableCell align="right">100</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                  <TableCell colSpan={2}>Grand Total (PKR)</TableCell>
+                                                  <TableCell align="right">{((((100 - discountPercentage) / 100) * finalSubtotalPrice) + 100)}</TableCell>
+                                                </TableRow>
+                                              </TableBody>
+                                            </Table>
+                                            <Row style={{ marginTop: '2rem' }}>
+                                              <Col md={6}>
+                                                <strong><p style={{ marginBottom: 0 }}>Message:</p></strong>
+                                                <p>{recieptData.message}</p>
+                                                <strong><p style={{ marginBottom: 0 }}>Call me incase of unavailable items:</p></strong>
+                                                <p>{recieptData.callMe}</p>
+                                              </Col>
+                                            </Row>
+                                          </Container>
+                                        </Box>
+                                      </Collapse>
+                                    </TableCell>
+                                  </TableRow>
+                                </>
+                              ) : null
+                            }
+                          </>
+                        )
+                      }
+                    </React.Fragment>
                   );
                 })}
             </TableBody>
@@ -358,8 +607,8 @@ export default function EnhancedTable(props) {
           count={tableRows.length}
           rowsPerPage={rowsPerPage}
           page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
     </div>

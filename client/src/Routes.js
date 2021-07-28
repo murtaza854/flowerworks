@@ -4,12 +4,12 @@ import {
   Route,
   useLocation
 } from "react-router-dom";
-import { SmallBanner, Navbar, IconBanner, Footer } from './components';
-import { Home, Shop, Signup, Signin, Subscribe, Cart, DIY, Product } from './pages';
+import { SmallBanner, Navbar, IconBanner, Footer, ConfirmationMessage } from './components';
+import { Home, Shop, Signup, Signin, Subscribe, Cart, DIY, Product, ForgotPassword } from './pages';
+import { Dashboard } from './dashboard';
 import CartContext from './share';
-import UserContext from './authenticatedUser';
+import DiscountContext from './discountContext';
 import api from './api';
-
 import {
   TransitionGroup,
   CSSTransition
@@ -17,10 +17,11 @@ import {
 //   import './App.scss';
 import './Form.scss';
 import './global.scss';
+import Auth from './auth/Auth';
 
 function Routes(props) {
   const [cart, setCart] = useState({ data: {}, count: 0 });
-  const [userState, setUserState] = useState();
+  const [discountState, setDiscountState] = useState(null);
   let location = useLocation();
 
   useEffect(() => {
@@ -42,7 +43,7 @@ function Routes(props) {
   useEffect(() => {
     (
       async () => {
-        const response = await fetch(`${api}/users/loggedIn`, {
+        const response = await fetch(`${api}/discounts/get-discount`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -51,18 +52,34 @@ function Routes(props) {
           withCredentials: true,
         });
         const content = await response.json();
-        try {
-          const user = content.data;
-          setUserState({ firstName: user.firstName, lastName: user.lastName, contactNumber: user.contactNumber, email: user.email, emailVerified: user.emailVerified });
-        } catch (error) {
-          setUserState();
-        }
+        setDiscountState(content.data);
       })();
   }, []);
 
+  // useEffect(() => {
+  //   (
+  //     async () => {
+  //       const response = await fetch(`${api}/users/loggedIn`, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         credentials: 'include',
+  //         withCredentials: true,
+  //       });
+  //       const content = await response.json();
+  //       try {
+  //         const user = content.data;
+  //         setUserState({ firstName: user.firstName, lastName: user.lastName, contactNumber: user.contactNumber, email: user.email, emailVerified: user.emailVerified });
+  //       } catch (error) {
+  //         setUserState();
+  //       }
+  //     })();
+  // }, []);
+
   return (
     <CartContext.Provider value={{ cartObj: cart, setCart: setCart }}>
-      <UserContext.Provider value={userState}>
+      <DiscountContext.Provider value={discountState}>
         <SmallBanner />
         <div className="global-mt-2"></div>
         <Navbar />
@@ -75,8 +92,41 @@ function Routes(props) {
           >
             <div className="page">
               <Switch location={location}>
+                <Route path="/__/auth/action">
+                  <Auth />
+                </Route>
+                <Route path="/forgot-password/sent" children={
+                  <ConfirmationMessage
+                    first=""
+                    bold="Password Reset"
+                    second=""
+                  />
+                } />
+                <Route path="/logout" children={
+                  <ConfirmationMessage
+                    first=""
+                    bold="Account Authentication"
+                    second=""
+                  />
+                } />
+                <Route path="/account-creation" children={
+                  <ConfirmationMessage
+                    first=""
+                    bold="Account creation"
+                    second=""
+                  />
+                } />
+                <Route path="/email-verification" children={
+                  <ConfirmationMessage
+                    first=""
+                    bold="Email verification"
+                    second=""
+                  />
+                } />
+                <Route path="/dashboard" children={<Dashboard />} />
                 <Route path="/signup" children={<Signup />} />
                 <Route path="/signin" children={<Signin />} />
+                <Route path="/forgot-password" children={<ForgotPassword />} />
                 <Route path="/cart" children={<Cart />} />
                 <Route path="/do-it-yourself" children={<DIY />} />
                 <Route path="/subscribe" children={<Subscribe />} />
@@ -90,7 +140,7 @@ function Routes(props) {
             </div>
           </CSSTransition>
         </TransitionGroup>
-      </UserContext.Provider>
+      </DiscountContext.Provider>
     </CartContext.Provider>
   );
 }

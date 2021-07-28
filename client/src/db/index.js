@@ -6,3 +6,5 @@ export { default as colorObj } from './color';
 export { default as sizeObj } from './size';
 export { default as flowerObj } from './flower';
 export { default as areaObj } from './area';
+export { default as orderObj } from './order';
+export { default as discountObj } from './discount';

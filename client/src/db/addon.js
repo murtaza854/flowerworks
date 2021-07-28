@@ -15,6 +15,9 @@ const editObjCheck = (data, value, editObj) => {
     else return data.find(obj => obj.name.toLowerCase().trim() === value.toLowerCase().trim())
 }
 
+const startAction = async (obj, selected, setOriginalTableRows, setTableRows) => {
+}
+
 const addonObj = {
     apiTable: `${api}/addons/TableData`,
     deleteApi: [`${api}/addons/getByIds`, `${api}/addons/delete`],
@@ -33,7 +36,13 @@ const addonObj = {
     addAllowed: true,
     modelName: 'Addon',
     ordering: 'name',
+    searchField: 'name',
     rightAllign: [],
+    type: 'enhanced',
+    startAction: startAction,
+    actionOptions: [
+        { label: '', value: '', type: '' }
+    ],
     Form: function(id, classes) {
         let history = useHistory();
 

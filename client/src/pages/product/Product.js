@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Heading1 } from '../../components';
 import './Product.scss';
 import { ProductCard, Addons } from './components';
 
 function Product(props) {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [])
     return (
         <Container fluid>
             <ProductCard />

@@ -132,10 +132,28 @@ a {
   .hide-991 {
     display: none;
   }
+  .center-relative-992 {
+    position: relative;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .global-mt-1 {
+    margin-top: 3.125rem;
+  }
+  
+  .global-mt-2 {
+    margin-top: 1.44rem;
+  }
+  
+  .global-mt-3 {
+    margin-top: 0.48rem;
+  }
 }
 
 // Small devices (landscape phones, less than 768px)
 @media (max-width: 47.99875em) {
+  
 }
 
 // X-Small devices (portrait phones, less than 576px)

@@ -19,6 +19,26 @@ router.get('/TableData', async (req, res) => {
     else res.json({data: addons});
 });
 
+router.get('/get-data', async (req, res) => {
+    const addons = [
+        { name: 'Butter Cake', price: 100 },
+        { name: 'Pound Cake', price: 200 },
+        { name: 'Sponge Cake', price: 300 },
+        { name: 'Genoise Cake', price: 400 },
+        { name: 'Biscuit Cake', price: 500 },
+        { name: 'Angel Food Cake', price: 600 },
+        { name: 'Chiffon Cake', price: 700 },
+        { name: 'Baked Flourless Cake', price: 800 },
+        { name: 'Unbaked Flourless Cake', price: 900 },
+        { name: 'Carrot Cake', price: 1000 },
+        { name: 'Red Velvet Cake', price: 1100 },
+        { name: 'Choclate Moose Cake', price: 1200 },
+        { name: 'Watch', price: 1300 },
+        { name: 'Wallet', price: 1400 },
+    ];
+    res.json({data: addons});
+})
+
 router.get('/getAddonsThree', async (req, res) => {
     const addons = await Addon.aggregate([{ $sample: { size: 3 } }, {$project: {_id: 0 , description: 0} }]);
     if (!addons) res.json({data: []});

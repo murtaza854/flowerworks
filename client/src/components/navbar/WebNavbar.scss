@@ -1,13 +1,15 @@
 .web-navbar {
     position: relative;
     z-index: 9;
+    padding: 0;
     .cart-icon {
         cursor: pointer;
         // margin-right: 0.5rem;
         border: 1px solid black;
     }
     img {
-        width: 21.875rem;
+        position: relative;
+        width: 21.875rem;;
     }
     .nav-spacing {
         margin-left: 3.125rem;
@@ -28,8 +30,11 @@
     .first-box {
         margin-right: 1.25rem;
     }
-    .hover-box {
+    .position-relative {
         position: relative;
+    }
+    .hover-box {
+        // position: relative;
         .account-icon {
             position: relative;
             cursor: pointer;
@@ -38,10 +43,17 @@
                 padding: 0.625rem 0;
                 height: 5rem;
             }
+            &:hover + .logged-in {
+                height: 5rem;
+            }
             &:hover + .cart-list-box {
                 outline: 1px solid rgb(138, 138, 138);
                 padding: 0.625rem 0;
                 height: 33rem;
+            }
+            &:hover + .shop-list {
+                padding: 0.625rem 0;
+                height: 17rem;
             }
         }
         .cart-buttons {
@@ -49,7 +61,9 @@
             padding: 2rem 0;
             text-align: center;
         }
-        .box-list, .cart-list-box {
+        .box-list,
+        .cart-list-box,
+        .shop-list {
             position: absolute;
             background-color: var(--silver);
             right: 0;
@@ -57,7 +71,7 @@
             overflow: hidden;
             height: 0;
             padding: 0;
-            transition: ease-in-out .3s;
+            transition: ease-in-out 0.3s;
             li {
                 font-size: 1.2rem;
                 font-weight: 400;
@@ -73,6 +87,24 @@
                 outline: 1px solid rgb(138, 138, 138);
                 padding: 0.625rem 0;
                 height: 5rem;
+            }
+        }
+        .logged-in {
+            &:hover {
+                height: 5rem;
+            }
+        }
+        .shop-list {
+            background-color: white;
+            width: 100%;
+            .spacing {
+                width: -moz-fit-content;
+                width: fit-content;
+                margin: 1rem;
+            }
+            &:hover {
+                padding: 0.625rem 0;
+                height: 17rem;
             }
         }
         .cart-list {
@@ -110,6 +142,86 @@
                     outline: none;
                 }
             }
+        }
+    }
+}
+
+// X-Large devices (large desktops, less than 1400px)
+@media (max-width: 87.49875em) {
+    .web-navbar {
+        img {
+            width: 19.875rem;
+        }
+        .nav-spacing {
+            margin-left: 2.125rem;
+            .nav-link {
+                font-size: 1.36rem;
+                margin-right: 0.852rem;
+            }
+        }
+        .hover-box {
+            .account-icon {
+                &:hover + .shop-list {
+                    height: 15rem;
+                }
+            }
+            .cart-list-box {
+                width: 37rem;
+            }
+            .shop-list {
+                &:hover {
+                    height: 15rem;
+                }
+            }
+        }
+    }
+}
+
+// Large devices (desktops, less than 1200px)
+@media (max-width: 74.99875em) {
+    .web-navbar {
+        img {
+            width: 17.875rem;
+        }
+        .nav-spacing {
+            margin-left: 1.125rem;
+            .nav-link {
+                font-size: 1.22rem;
+                margin-right: 0.766rem;
+            }
+        }
+        .hover-box {
+            .account-icon {
+                &:hover + .shop-list {
+                    height: 13rem;
+                }
+            }
+            .cart-list-box {
+                width: 35rem;
+            }
+            .shop-list {
+                &:hover {
+                    height: 13rem;
+                }
+            }
+        }
+    }
+}
+
+// Medium devices (tablets, less than 992px)
+@media (max-width: 61.99875em) {
+}
+
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 47.99875em) {
+}
+
+// X-Small devices (portrait phones, less than 576px)
+@media (max-width: 35.99875em) {
+    .web-navbar {
+        padding: 0 2rem;
+        img {
+            width: 10.875rem;
         }
     }
 }

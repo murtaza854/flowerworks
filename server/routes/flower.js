@@ -8,6 +8,26 @@ router.get('/TableData', async (req, res) => {
     else res.json({data: flowers});
 });
 
+router.get('/get-data', async (req, res) => {
+    const flowers = [
+        { name: 'Rose', price: 100 },
+        { name: 'Lily', price: 200 },
+        { name: 'Tulip', price: 300 },
+        { name: 'Orchid', price: 400 },
+        { name: 'Carnation', price: 500 },
+        { name: 'Freesia', price: 600 },
+        { name: 'Hyacinth', price: 700 },
+        { name: 'Peruvian Lily', price: 800 },
+        { name: 'Chrysanthemum', price: 900 },
+        { name: 'Gladiolus', price: 1000 },
+        { name: 'Anemone', price: 1100 },
+        { name: 'Daffodil', price: 1200 },
+        { name: 'Poppy', price: 1300 },
+        { name: 'Sunflower', price: 1400 },
+    ];
+    res.json({data: flowers});
+});
+
 router.post('/add', async (req, res) => {
     const data = req.body;
     const newFlower = new Flower({

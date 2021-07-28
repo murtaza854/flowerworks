@@ -1,137 +1,264 @@
 const router = require('express').Router();
-// const database = require( '../db' );
-const nodemailer = require('nodemailer');
 const User = require('../schema').user;
-const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const crypto = require("crypto");
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.yandex.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: 'no-reply@flowerworks.pk',
-      pass: 'flowerworks'
+const firebaseFile = require('../firebase');
+const firebase = firebaseFile.firebase;
+const firebaseAdmin = firebaseFile.admin;
+
+// const transporter = nodemailer.createTransport({
+//     host: 'smtp.yandex.com',
+//     port: 465,
+//     secure: true,
+//     auth: {
+//       user: 'no-reply@flowerworks.pk',
+//       pass: 'flowerworks'
+//     }
+// });
+
+function login(email, password) {
+    return new Promise((resolve, reject) => {
+        return firebase.auth().signInWithEmailAndPassword(email, password)
+            .then((user) => resolve(user))
+            .catch((err) => reject(err));
+    });
+}
+
+router.get('/TableData', async (req, res) => {
+    const users = await User.find({}, { uid: 0 });
+    if (!users) res.json({ data: [] });
+    else res.json({ data: users });
+});
+
+router.post('/set-active', async (req, res) => {
+    const active = req.body.active;
+    const selected = req.body.selected;
+    await User.updateMany({}, { 'active': active }).where('_id').in(selected);
+    const users = await User.find({}, { uid: 0 })
+    res.json({ data: users });
+});
+
+router.post('/reset-password-check', async (req, res) => {
+    try {
+        await firebase.auth().verifyPasswordResetCode(req.body.actionCode)
+        res.json({ data: true });
+    } catch (error) {
+        res.json({ data: false });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    try {
+        await firebase.auth().confirmPasswordReset(req.body.actionCode, req.body.password);
+        res.json({ data: true });
+    } catch (error) {
+        res.json({ data: false });
+    }
+});
+
+router.post('/recover-email', (req, res) => {
+    var restoredEmail = null;
+    firebase.auth().checkActionCode(req.body.actionCode).then((info) => {
+        restoredEmail = info['data']['email'];
+        return firebase.auth().applyActionCode(req.body.actionCode);
+    }).then(() => {
+        firebase.auth().sendPasswordResetEmail(restoredEmail).then(() => {
+            res.json({ data: true });
+        }).catch((error) => {
+            res.json({ data: false });
+        });
+    }).catch((error) => {
+        res.json({ data: false });
+    });
+});
+
+router.post('/verify-email', async (req, res) => {
+    try {
+        await firebase.auth().applyActionCode(req.body.actionCode);
+        res.json({ data: true });
+    } catch (error) {
+        res.json({ data: false });
+    }
+});
+
+router.post('/change-password', async (req, res) => {
+    console.log(req.body);
+    const user = firebase.auth().currentUser;
+    const email = user.email;
+    const newEmail = req.body.email;
+    const credential = firebase.auth.EmailAuthProvider.credential(
+        email,
+        req.body.oldPassword
+    );
+    console.log(credential);
+    try {
+        await user.reauthenticateWithCredential(credential);
+        await user.updatePassword(req.body.password);
+        console.log('success');
+        res.json({ data: true });
+    } catch (error) {
+        console.log(error)
+        res.json({ data: false });
     }
 });
 
 router.post('/login', async (req, res) => {
-    const user = await User.findOne({email: req.body.email});
-    if (!user) {
-        return res.status(404).send({
-            loggedIn: false
-        })
-    } else {
-        const salt = user.salt;
-        const userHash = user.hash;
-        const password = req.body.password;
-        const hash = crypto.pbkdf2Sync(password, salt,  parseInt(process.env.ITERATIONS), 64, process.env.HASH_ALGORITHM).toString(`hex`);
-        if (userHash !== hash) {
-            res.json({
-                loggedIn: false
-            });
-        } else {
-            const token = generateAccessToken(user.firstName, user.lastName, user.email, user.staff, user.emailVerified, user.contactNumber);
-            res.status(200)
-            .cookie('token', token, {httpOnly: true, secure:true, maxAge: 24 * 60 * 60 * 1000, sameSite: 'lax'})
-            .json({loggedIn: true});
-        }
+    try {
+        // const response = await firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password);
+        const response = await login(req.body.email, req.body.password);
+        const user = response.user;
+        const idTokenResult = await user.getIdTokenResult();
+        const authUser = await User.findOne({ uid: user.uid });
+        const email = user.email;
+        const emailVerified = user.emailVerified;
+        const admin = idTokenResult.claims.admin;
+        if (emailVerified === false) {
+            await firebase.auth().signOut();
+            res.json({ data: false })
+        } else res.json({ data: { firstName: authUser.firstName, lastName: authUser.lastName, email: email, emailVerified: emailVerified, contactNumber: authUser.contactNumber, admin: admin } });
+    } catch (error) {
+        res.json({ data: null, error: error });
     }
 });
 
 router.get('/loggedIn', async (req, res) => {
     try {
-        const cookie = req.cookies['token'];
-
-        const claims = jwt.verify(cookie, process.env.TOKEN_SECRET);
-        if (!claims) {
-            return res.status(401).send({loggedIn: false});
-        }
-        res.status(200).send({loggedIn: true, data: claims});
-    } catch (e) {
-        return res.status(401).send({
-            loggedIn: false
-        });
+        const user = firebase.auth().currentUser;
+        if (user) {
+            const idTokenResult = await user.getIdTokenResult();
+            const authUser = await User.findOne({ uid: user.uid });
+            const email = user.email;
+            const emailVerified = user.emailVerified;
+            const admin = idTokenResult.claims.admin;
+            res.json({ data: { firstName: authUser.firstName, lastName: authUser.lastName, email: email, emailVerified: emailVerified, contactNumber: authUser.contactNumber, admin: admin } });
+        } else res.json({ data: null })
+    } catch (error) {
+        res.json({ data: null, error: error });
     }
 });
 
-router.post('/logout', (req, res) => {
-    res.cookie('token', '', {maxAge: 0, sameSite: 'lax'});
-
-    res.send({
-        message: 'success'
-    })
+router.post('/logout', async (req, res) => {
+    try {
+        await firebase.auth().signOut();
+        res.json({ loggedIn: false });
+    } catch (error) {
+        res.json({ loggedIn: false, error: error });
+    }
 });
 
-router.get('/TableData', async (req, res) => {
-    const users = await User.find({}, {projection: {hash: 0, salt: 0}});
-    if (!users) res.json({data: []});
-    else res.json({data: users});
+router.post('/change-profile', async (req, res) => {
+    console.log(req.body);
+    const user = firebase.auth().currentUser;
+    const email = user.email;
+    const newEmail = req.body.email;
+    const credential = firebase.auth.EmailAuthProvider.credential(
+        email,
+        req.body.password
+    );
+    try {
+        await user.reauthenticateWithCredential(credential);
+        const dbUser = await User.findOne({ uid: user.uid });
+        console.log(dbUser);
+        await user.updateProfile({
+            displayName: req.body.firstName
+        })
+        dbUser.firstName = req.body.firstName;
+        dbUser.lastName = req.body.lastName;
+        dbUser.contactNumber = req.body.contactNumber;
+        const emailChange = false;
+        if (email !== newEmail) {
+            await user.updateEmail(newEmail);
+            user.sendEmailVerification();
+            dbUser.email = newEmail;
+            emailChange = true;
+        }
+        dbUser.save();
+        const idTokenResult = await user.getIdTokenResult();
+        const emailVerified = user.emailVerified;
+        const admin = idTokenResult.claims.admin;
+        res.json({ data: 'success', emailChange: emailChange, user: { firstName: req.body.firstName, lastName: req.body.lastName, email: user.email, emailVerified: emailVerified, contactNumber: req.body.contactNumber, admin: admin } });
+    } catch (error) {
+        console.log(error);
+        res.json({ data: 'failed' });
+    }
+});
+
+router.post('/signup', async (req, res) => {
+    try {
+        const response = await firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password);
+        const user = response.user;
+        await firebaseAdmin.auth().setCustomUserClaims(user.uid, { admin: false });
+        user.sendEmailVerification();
+        await user.updateProfile({
+            displayName: req.body.firstName,
+        });
+        const newUser = new User({
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            contactNumber: req.body.contactNumber,
+            staff: false,
+            active: true,
+            uid: user.uid
+        });
+        newUser.save();
+        await firebase.auth().signOut();
+        res.json({ success: true });
+    } catch (error) {
+        res.json({ success: false, error: error });
+    }
 });
 
 router.post('/add', async (req, res) => {
-    const token = crypto.randomBytes(64).toString('hex');
-    const salt = crypto.randomBytes(16).toString('hex');
-    const hash = crypto.pbkdf2Sync(req.body.password, salt,  parseInt(process.env.ITERATIONS), 64, process.env.HASH_ALGORITHM).toString(`hex`);
-    const newUser = new User({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        contactNumber: req.body.contactNumber,
-        salt: salt,
-        hash: hash,
-        staff: req.body.staff,
-        adminApproved: req.body.adminApproved,
-        token:token
-    });
-    newUser.save();
-    const mailOptions = {
-        from: 'no-reply@flowerworks.pk',
-        to: req.body.email,
-        subject: 'Email verification',
-        html: `<p>Please click the below link to verify your email:</p><a href="http://localhost:4000/api/users/verify/${token}">Verify</a>`
-    };
-    
-    transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-    });
-    res.json({data: 'success'});
-});
-
-router.get('/verify/:token', async (req, res) => {
-    const { token } = req.params;
-    const user = await User.findOne({token: token});
-    if (user) {
-        user.emailVerified = true;
-        user.save();
-        res.json({message:'Email verified!'});
-    } else {
-        res.json({message: 'Invalid token'});
+    try {
+        const response = await firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password);
+        const user = response.user;
+        await firebaseAdmin.auth().setCustomUserClaims(user.uid, { admin: true });
+        user.sendEmailVerification();
+        await user.updateProfile({
+            displayName: req.body.firstName,
+        });
+        const newUser = new User({
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            contactNumber: req.body.contactNumber,
+            staff: req.body.staff,
+            active: req.body.active,
+            uid: user.uid
+        });
+        newUser.save();
+        await firebase.auth().signOut();
+        res.json({ success: true });
+    } catch (error) {
+        res.json({ success: false, error: error });
     }
 });
 
-router.get('/getByIds', async (req, res) => {
-    let id = '';
-    if ('id' in req.query) id = req.query.id;
-    const getIds = id.split(',');
-    const users = await User.find({_id: getIds}, {projection: {hash: 0, salt: 0}});
-    if (!users) res.json({data: []});
-    else res.json({data: users});
+router.get('/get-by-ids', async (req, res) => {
+    try {
+        let id = '';
+        if ('id' in req.query) id = req.query.id;
+        const getIds = id.split(',');
+        const users = await User.find({ _id: getIds });
+        res.json({ data: users });
+    } catch (error) {
+        res.json({ data: [], error: error });
+    }
 });
 
 router.post('/delete', async (req, res) => {
-    await User.deleteMany({_id: req.body.ids}, {projection: {hash: 0, salt: 0}});
-    res.json({data: 'success'});
+    try {
+        const users = await User.find({ _id: req.body.ids }, { uid: 1 });
+        users.forEach(async admin => {
+            await firebaseAdmin.auth().deleteUser(admin.uid)
+        })
+        await User.deleteMany({ _id: req.body.ids });
+        res.json({ success: true });
+    } catch (error) {
+        res.json({ success: false, error: error });
+    }
 });
-
-function generateAccessToken(firstName, lastName, email, staff, emailVerified, contactNumber) {
-    return jwt.sign({firstName: firstName, lastName: lastName, email: email, staff: staff, emailVerified: emailVerified, contactNumber: contactNumber}, process.env.TOKEN_SECRET, { expiresIn: '24h' });
-}
 
 module.exports = router;

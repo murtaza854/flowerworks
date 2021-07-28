@@ -31,17 +31,39 @@
         backface-visibility: hidden;
     }
 }
+.cat-card-navbar {
+    height: 12.625rem;
+    width: 12.625rem;
+    img {
+        height: 12.625rem;
+        width: 12.625rem;
+    }
+}
+
 .price {
     font-size: 1.8rem;
     font-weight: 500;
     text-align: center;
     padding: 0.625rem 0;
+    line-height: 1.3rem;
+}
+
+.discounted {
+    text-decoration: line-through;
 }
 
 // X-Large devices (large desktops, less than 1400px)
 @media (max-width: 87.49875em) {
     .price {
         font-size: 1.71rem;
+    }
+    .cat-card-navbar {
+        height: 10.625rem;
+        width: 10.625rem;
+        img {
+            height: 10.625rem;
+            width: 10.625rem;
+        }
     }
 }
 
@@ -57,6 +79,14 @@
     }
     .price {
         font-size: 1.6rem;
+    }
+    .cat-card-navbar {
+        height: 8.625rem;
+        width: 8.625rem;
+        img {
+            height: 8.625rem;
+            width: 8.625rem;
+        }
     }
 }
 
@@ -87,6 +117,7 @@
     }
     .price {
         font-size: 1.3rem;
+        line-height: 0.9rem;
     }
 }
 

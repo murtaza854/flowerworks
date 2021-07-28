@@ -1,30 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { Heading1, ParaText, Button } from '../../../../components';
 import './ProductCard.scss';
 import api from '../../../../api';
+import CartContext from '../../../../share';
 
 function ProductCard(props) {
     const { product } = useParams();
-    
-    const [item, setItem] = useState({name: '', imagePath: '', price: '', slug: '', description: ''});
+    const cart = useContext(CartContext);
+
+    const [item, setItem] = useState({ name: '', imagePath: '', price: '', slug: '', description: '' });
 
     useEffect(() => {
-      (
-        async () => {
-          const response = await fetch(`${api}/products/getProduct?slug=${product}`, {
-            method: 'GET',
+        (
+            async () => {
+                const response = await fetch(`${api}/products/getProduct?slug=${product}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    withCredentials: true,
+                });
+                const content = await response.json();
+                setItem(content.data);
+            })();
+    }, [product]);
+
+    const onClick = async (event, productSlug) => {
+        event.preventDefault();
+        const response = await fetch(`${api}/cart/addToCart`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
             withCredentials: true,
-          });
-          const content = await response.json();
-          setItem(content.data);
-        })();
-    }, [product]);
+            body: JSON.stringify({ productSlug: productSlug })
+        });
+        const content = await response.json();
+        cart.setCart(content.data);
+    }
 
     return (
         <Container className="product-card">
@@ -59,7 +76,7 @@ function ProductCard(props) {
                         />
                     </div>
                     <div className="product-button">
-                        <Button to="/" productSlug={item.slug} text="Shop it" classes="text-uppercase" classes1="btn-center-991" />
+                        <Button to="/" onClick={event => onClick(event, item.slug)} text="Shop it" classes="text-uppercase" classes1="btn-center-991" />
                     </div>
                 </Col>
             </Row>

@@ -7,6 +7,7 @@ const color = require('./color');
 const size = require('./size');
 const area = require('./area');
 const order = require('./order');
+const discount = require('./discount');
 
 module.exports = {
     user,
@@ -17,5 +18,6 @@ module.exports = {
     color,
     size,
     area,
-    order
+    order,
+    discount
 };

@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container, Form, Col, Row } from 'react-bootstrap';
 import { Button, Heading1, Divider } from '../../components';
 import CheckBoxOutlineBlankOutlinedIcon from '@material-ui/icons/CheckBoxOutlineBlankOutlined';
 import { RadioGroup, Radio, FormControlLabel, FormControl } from '@material-ui/core';
 import CheckBoxOutlinedIcon from '@material-ui/icons/CheckBoxOutlined';
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import './Subscribe.scss';
 
 function Subscribe(props) {
-    const theme = createMuiTheme({
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [])
+    const theme = createTheme({
         palette: {
             type: 'light',
             primary: {

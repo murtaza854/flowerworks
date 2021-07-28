@@ -6,21 +6,21 @@ import './Home.scss';
 
 function Home(props) {
     useEffect(() => {
-      window.scrollTo(0, 0);
+        window.scrollTo(0, 0);
     }, [])
     return (
         <Container fluid>
             <Poster />
             <div className="global-mt-2" />
-            <Banner 
+            <Banner
                 button={<Button to="/subscribe" text="Subscribe" classes="text-uppercase" classes1="btn-center-991" />}
-                heading={          
+                heading={
                     <Heading1
-                    first="Want fresh flowers"
-                    bold="every"
-                    second="month?"
-                    classes="text-uppercase text-center"
-                />
+                        first="Want fresh flowers"
+                        bold="every"
+                        second="month?"
+                        classes="text-uppercase text-center"
+                    />
                 }
             />
             <div className="global-mt-1"></div>

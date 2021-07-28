@@ -30,31 +30,31 @@ function Category(props) {
         <Container className="category">
             <Row className="justify-content-center">
                 {categoryArray}
-                {/* <Col md={4} className="spacing">
-                    <Card button={<Button to="box" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" />
+                <Col md={4} className="spacing">
+                    <Card button={<Button to="box" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" />
                 </Col>
                 <Col md={4} className="spacing">
-                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
+                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" text="box" />
                 </Col>
                 <Col md={4} className="spacing">
-                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
+                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" text="box" />
                 </Col>
                 <Col md={4} className="spacing">
-                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
+                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" text="box" />
                 </Col>
                 <Col md={4} className="spacing">
-                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
-                </Col> */}
+                    <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" text="box" />
+                </Col>
             </Row>
             {/* <Row className="justify-content-center"> */}
                 {/* <Col md={4} className="spacing">
-                        <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
+                        <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" text="box" />
                     </Col>
                     <Col md={4} className="spacing">
-                        <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
+                        <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" text="box" />
                     </Col>
                     <Col md={4} className="spacing">
-                        <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.png" alt="box" text="box" />
+                        <Card button={<Button to="/" text="Box" classes="center-absolute text-uppercase" />} src="/images/box.jpg" alt="box" text="box" />
                     </Col> */}
                 {/* </Row> */}
         </Container>

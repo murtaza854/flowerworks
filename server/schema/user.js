@@ -1,26 +1,21 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    firstName:String,
-    lastName:String,
-    name:String,
-    email:String,
-    contactNumber:String,
-    salt:String,
-    hash:String,
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true },
+    contactNumber: { type: String, required: true },
     staff: {
         type: Boolean,
-        default: false
+        default: false,
+        required: true
     },
-    adminApproved: {
+    active: {
         type: Boolean,
-        default: false
+        default: true,
+        required: true
     },
-    emailVerified: {
-        type: Boolean,
-        default: false
-    },
-    token:String
+    uid: { type: String, required: true },
 });
 
 const User = mongoose.model('users', userSchema);

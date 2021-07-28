@@ -15,6 +15,9 @@ const editObjCheck = (data, value, editObj) => {
     else return data.find(obj => obj.name.toLowerCase().trim() === value.toLowerCase().trim())
 }
 
+const startAction = async (obj, selected, setOriginalTableRows, setTableRows) => {
+}
+
 const flowerObj = {
     apiTable: `${api}/flowers/TableData`,
     deleteApi: [`${api}/flowers/getByIds`, `${api}/flowers/delete`],
@@ -32,7 +35,13 @@ const flowerObj = {
     addAllowed: true,
     modelName: 'Flower',
     ordering: 'name',
+    searchField: 'name',
     rightAllign: [],
+    type: 'enhanced',
+    startAction: startAction,
+    actionOptions: [
+        { label: '', value: '', type: '' }
+    ],
     Form: function(id, classes) {
         let history = useHistory();
 

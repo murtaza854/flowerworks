@@ -15,6 +15,9 @@ const editObjCheck = (data, value, editObj) => {
     else return data.find(obj => obj.name.toLowerCase().trim() === value.toLowerCase().trim())
 }
 
+const startAction = async (obj, selected, setOriginalTableRows, setTableRows) => {
+}
+
 const colorObj = {
     apiTable: `${api}/colors/TableData`,
     deleteApi: [`${api}/colors/getByIds`, `${api}/colors/delete`],
@@ -32,7 +35,13 @@ const colorObj = {
     addAllowed: true,
     modelName: 'Color',
     ordering: 'name',
+    searchField: 'name',
     rightAllign: [],
+    type: 'enhanced',
+    startAction: startAction,
+    actionOptions: [
+        { label: '', value: '', type: '' }
+    ],
     Form: function(id, classes) {
         let history = useHistory();
 

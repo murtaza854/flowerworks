@@ -44,7 +44,7 @@
     margin-bottom: 1.5rem;
   }
   .form-group {
-    height: 7.5rem;
+    // height: 7.5rem;
     // padding: 0 50px;
   }
   .form-label,
@@ -55,10 +55,16 @@
   .MuiFormControlLabel-label {
     font-size: 1.2rem;
   }
-  .error-text {
+  .error-text,
+  .show-password {
     margin-top: 0.188rem;
     font-size: 0.8rem;
     color: rgb(180, 0, 0);
+  }
+  .show-password {
+    color: black;
+    cursor: pointer;
+    text-align: right;
   }
   input[type="text"],
   input[type="email"],
@@ -77,6 +83,33 @@
       border: 1px solid black;
     }
   }
+  .btn {
+    padding: 0.625rem 0;
+    background-color: black;
+    color: white;
+    cursor: pointer;
+    width: 12.5rem;
+    text-align: center;
+    font-weight: 400;
+    font-size: 1.4rem;
+    border: 1px solid black;
+    text-transform: uppercase;
+    border-radius: 0;
+    transition: ease-in-out 0.3s;
+    &:hover {
+      background-color: transparent;
+      color: black;
+      border: 1px solid black;
+    }
+    &:active {
+      background-color: rgb(121, 121, 121);
+      color: white;
+      box-shadow: none;
+    }
+    &:focus {
+      box-shadow: none;
+    }
+  }
   .horizontal-center-margin {
     margin-top: 1.875rem;
     margin-bottom: 0.625rem;
@@ -87,6 +120,9 @@
 @media (max-width: 87.49875em) {
   .form-style {
     padding: 5rem 2.5rem 2.5rem;
+    .btn {
+      font-size: 1.33rem;
+    }
   }
 }
 
@@ -94,6 +130,10 @@
 @media (max-width: 74.99875em) {
   .form-style {
     padding: 5rem 2rem 2.5rem;
+    .btn {
+      width: 12rem;
+      font-size: 1.26rem;
+    }
   }
 }
 
@@ -101,6 +141,10 @@
 @media (max-width: 61.99875em) {
   .form-style {
     padding: 3rem 2rem 2.5rem;
+    .btn {
+      width: 10rem;
+      font-size: 1.19rem;
+    }
     .input-form-group {
       width: 50%;
     }
@@ -113,7 +157,12 @@
 // Small devices (landscape phones, less than 768px)
 @media (max-width: 47.99875em) {
   .form-style {
-    .input-form-group, .checkbox-form-group {
+    .btn {
+      width: 9.5rem;
+      font-size: 1.12rem;
+    }
+    .input-form-group,
+    .checkbox-form-group {
       width: 100%;
     }
   }
@@ -121,4 +170,9 @@
 
 // X-Small devices (portrait phones, less than 576px)
 @media (max-width: 35.99875em) {
+  .form-style {
+    .btn {
+      font-size: 1.05rem;
+    }
+  }
 }

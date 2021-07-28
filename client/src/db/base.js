@@ -17,6 +17,9 @@ const editObjCheck = (data, value, editObj) => {
     else return data.find(obj => obj.name.toLowerCase().trim() === value.toLowerCase().trim())
 }
 
+const startAction = async (obj, selected, setOriginalTableRows, setTableRows) => {
+}
+
 const baseObj = {
     apiTable: `${api}/bases/TableData`,
     deleteApi: [`${api}/bases/getByIds`, `${api}/bases/delete`],
@@ -35,7 +38,13 @@ const baseObj = {
     addAllowed: true,
     modelName: 'Base',
     ordering: 'name',
+    searchField: 'name',
     rightAllign: [],
+    type: 'enhanced',
+    startAction: startAction,
+    actionOptions: [
+        { label: '', value: '', type: '' }
+    ],
     Form: function(id, classes) {
         let history = useHistory();
 
