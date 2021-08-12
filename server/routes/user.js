@@ -91,7 +91,6 @@ router.post('/change-password', async (req, res) => {
         email,
         req.body.oldPassword
     );
-    console.log(credential);
     try {
         await user.reauthenticateWithCredential(credential);
         await user.updatePassword(req.body.password);
