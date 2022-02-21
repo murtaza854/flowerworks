@@ -9,3 +9,4 @@ export { default as Product } from './product/Product';
 export { default as Thankyou } from './thankyou/Thankyou';
 export { default as NotVerified } from './notVerified/NotVerified';
 export { default as ForgotPassword } from './forgotPassword/ForgotPassword';
+export { default as Contact } from './contact/Contact';

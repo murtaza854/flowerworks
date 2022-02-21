@@ -9,7 +9,8 @@
     }
     img {
         position: relative;
-        width: 21.875rem;;
+        // width: 21.875rem;
+        width: 17.875rem;
     }
     .nav-spacing {
         margin-left: 3.125rem;
@@ -17,7 +18,8 @@
             text-transform: uppercase;
             color: black !important;
             font-weight: 400;
-            font-size: 1.5rem;
+            // font-size: 1.5rem;
+            font-size: 1.36rem;
             margin-right: 0.938rem;
         }
         .ml-auto {
@@ -144,18 +146,24 @@
             }
         }
     }
+    .hamburger-icon {
+        font-size: 3rem;
+        color: black;
+        margin-right: 1rem;
+        cursor: pointer;
+    }
 }
 
 // X-Large devices (large desktops, less than 1400px)
 @media (max-width: 87.49875em) {
     .web-navbar {
-        img {
-            width: 19.875rem;
-        }
+        // img {
+        //     width: 19.875rem;
+        // }
         .nav-spacing {
             margin-left: 2.125rem;
             .nav-link {
-                font-size: 1.36rem;
+                // font-size: 1.36rem;
                 margin-right: 0.852rem;
             }
         }

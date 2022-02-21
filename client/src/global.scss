@@ -56,15 +56,23 @@ a {
 }
 
 .unhide-991 {
-  display: none;
+  display: none !important;
 }
 
 .fit-content {
   width: fit-content;
 }
 
+.line-through {
+  text-decoration: line-through !important;
+}
+
 .p-0 {
   padding: 0;
+}
+
+.unhide-768 {
+    display: none !important;
 }
 
 .ml-auto {
@@ -83,9 +91,92 @@ a {
   margin-top: 1.25rem;
 }
 
+.margin-bottom-0 {
+  margin-bottom: 0 !important;
+}
+
+.margin-global-top-02 {
+    margin-top: 0.2rem;
+}
+.margin-global-top-06 {
+    margin-top: 0.6rem;
+}
+
+.margin-global-top-1 {
+    margin-top: 1rem;
+}
+
+.margin-global-top-2 {
+    margin-top: 2rem;
+}
+
+.margin-global-top-3 {
+    margin-top: 3rem;
+}
+
+.margin-global-top-4 {
+    margin-top: 4rem;
+}
+
+.margin-global-top-5 {
+    margin-top: 5rem;
+}
+
+.margin-global-top-6 {
+    margin-top: 6rem;
+}
+
+.margin-global-top-7 {
+    margin-top: 7rem;
+}
+
+.margin-global-top-8 {
+    margin-top: 8rem;
+}
+
+.margin-global-top-9 {
+    margin-top: 9rem;
+}
+
+.margin-global-top-10 {
+    margin-top: 10rem;
+}
+
+.margin-global-top-11 {
+    margin-top: 11rem;
+}
+
+.margin-global-top-12 {
+    margin-top: 12rem;
+}
+
+.margin-global-top-13 {
+    margin-top: 13rem;
+}
+
+.margin-global-top-14 {
+    margin-top: 14rem;
+}
+
+.margin-global-top-15 {
+    margin-top: 15rem;
+}
+
+.padding-left-0-5 {
+    padding-left: 0.5rem;
+}
+.margin-global-left-1 {
+    margin-left: 1rem;
+}
+.margin-global-left-2 {
+    margin-left: 2rem;
+}
+.margin-global-left-3 {
+    margin-left: 3rem;
+}
+
 .transition {
   position: relative;
-  // height: 100%;
 }
 
 .page {
@@ -96,23 +187,19 @@ a {
 
 .page-enter {
   opacity: 0;
-  // transform: scale(1.1);
 }
 
 .page-enter-active {
   opacity: 1;
-  // transform: scale(1);
   transition: opacity 250ms;
 }
 
 .page-exit {
   opacity: 1;
-  // transform: scale(1);
 }
 
 .page-exit-active {
   opacity: 0;
-  // transform: scale(0.9);
   transition: opacity 250ms;
 }
 
@@ -127,7 +214,7 @@ a {
 // Medium devices (tablets, less than 992px)
 @media (max-width: 61.99875em) {
   .unhide-991 {
-    display: block;
+    display: block !important;
   }
   .hide-991 {
     display: none;
@@ -153,7 +240,9 @@ a {
 
 // Small devices (landscape phones, less than 768px)
 @media (max-width: 47.99875em) {
-  
+  .unhide-768 {
+      display: block !important;
+  }
 }
 
 // X-Small devices (portrait phones, less than 576px)

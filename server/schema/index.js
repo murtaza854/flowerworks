@@ -8,6 +8,10 @@ const size = require('./size');
 const area = require('./area');
 const order = require('./order');
 const discount = require('./discount');
+const promotionCode = require('./promotionCode');
+const coupon = require('./coupon');
+const subscribe = require('./subscribe');
+const subscribedUser = require('./subscribedUser');
 
 module.exports = {
     user,
@@ -19,5 +23,9 @@ module.exports = {
     size,
     area,
     order,
-    discount
+    discount,
+    promotionCode,
+    coupon,
+    subscribe,
+    subscribedUser
 };

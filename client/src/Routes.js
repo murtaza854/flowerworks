@@ -5,7 +5,7 @@ import {
   useLocation
 } from "react-router-dom";
 import { SmallBanner, Navbar, IconBanner, Footer, ConfirmationMessage } from './components';
-import { Home, Shop, Signup, Signin, Subscribe, Cart, DIY, Product, ForgotPassword } from './pages';
+import { Home, Shop, Subscribe, Cart, DIY, Product, ForgotPassword, Contact } from './pages';
 import { Dashboard } from './dashboard';
 import CartContext from './share';
 import DiscountContext from './discountContext';
@@ -14,13 +14,12 @@ import {
   TransitionGroup,
   CSSTransition
 } from "react-transition-group";
-//   import './App.scss';
 import './Form.scss';
 import './global.scss';
 import Auth from './auth/Auth';
 
 function Routes(props) {
-  const [cart, setCart] = useState({ data: {}, count: 0 });
+  const [cart, setCart] = useState({});
   const [discountState, setDiscountState] = useState(null);
   let location = useLocation();
 
@@ -55,27 +54,6 @@ function Routes(props) {
         setDiscountState(content.data);
       })();
   }, []);
-
-  // useEffect(() => {
-  //   (
-  //     async () => {
-  //       const response = await fetch(`${api}/users/loggedIn`, {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         credentials: 'include',
-  //         withCredentials: true,
-  //       });
-  //       const content = await response.json();
-  //       try {
-  //         const user = content.data;
-  //         setUserState({ firstName: user.firstName, lastName: user.lastName, contactNumber: user.contactNumber, email: user.email, emailVerified: user.emailVerified });
-  //       } catch (error) {
-  //         setUserState();
-  //       }
-  //     })();
-  // }, []);
 
   return (
     <CartContext.Provider value={{ cartObj: cart, setCart: setCart }}>
@@ -124,8 +102,9 @@ function Routes(props) {
                   />
                 } />
                 <Route path="/dashboard" children={<Dashboard />} />
-                <Route path="/signup" children={<Signup />} />
-                <Route path="/signin" children={<Signin />} />
+                {/* <Route path="/signup" children={<Signup />} />
+                <Route path="/signin" children={<Signin />} /> */}
+                <Route path="/contact" children={<Contact />} />
                 <Route path="/forgot-password" children={<ForgotPassword />} />
                 <Route path="/cart" children={<Cart />} />
                 <Route path="/do-it-yourself" children={<DIY />} />

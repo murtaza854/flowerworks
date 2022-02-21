@@ -2,7 +2,6 @@ import React, { useEffect, useContext } from 'react';
 import { Container, Col, Row } from 'react-bootstrap';
 import api from '../../api';
 import { RadioBox, Heading1, Button, ParaText } from '../../components';
-import DiscountContext from '../../discountContext';
 import CartContext from '../../share';
 import './DIY.scss';
 
@@ -29,26 +28,61 @@ function DIY(props) {
     const [addonArray, setAddonArray] = React.useState();
 
     const cart = useContext(CartContext);
-    const discount = useContext(DiscountContext);
 
     const [cost, setCost] = React.useState(0);
     const [discountedPrice, setDiscountedPrice] = React.useState({ value: '', class: '' });
 
     useEffect(() => {
         try {
-            if (discount && discount.type === 'DIY') {
-                const newPrice = ((100 - discount.discountPercentage) / 100) * cost;
-                setDiscountedPrice({ value: `PKR.${newPrice}`, class: 'line-through' });
-            } else throw new Error();
+            const getCoupons = async () => {
+                const response = await fetch(`${api}/coupon/getCoupons-client`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    withCredentials: true,
+                });
+                const content = await response.json();
+                const coupons = content.coupons;
+                let coupon = null;
+                for (let i = 0; i < coupons.length; i++) {
+                    const couponFromArray = coupons[i];
+                    if (couponFromArray.redeemBy && new Date(couponFromArray.redeemBy) >= new Date()) {
+                        coupon = couponFromArray;
+                        break;
+                    }
+                }
+                if (!coupon && coupons.length > 0) coupon = coupons[0];
+                let discountedPriceDB = null;
+                let discountClassDB = '';
+                if (coupon) {
+                    let flag = true;
+                    if (coupon.redeemBy && new Date(coupon.redeemBy) < new Date()) flag = false;
+                    if (coupon.maxRedemptions && coupon.maxRedemptions <= coupon.timesRedeeemed) flag = false;
+                    if (flag) {
+                        if (coupon.appliedToDIY) {
+                            discountClassDB = 'line-through';
+                            if (coupon.type === 'Fixed Amount Discount') {
+                                discountedPriceDB = (cost - coupon.amountOff) < 0 ? 0 : `PKR.${cost - coupon.amountOff}`;
+                            } else {
+                                discountedPriceDB = `PKR.${cost - (cost * (coupon.percentOff / 100))}`;
+                            }
+                        }
+                    }
+                }
+                setDiscountedPrice({ value: discountedPriceDB, class: discountClassDB });
+            }
+            getCoupons();
         } catch (error) {
-            setDiscountedPrice({ value: '', class: '' });
+            
         }
-    }, [discount, cost])
+    }, [cost])
 
     useEffect(() => {
         (
             async () => {
-                const response = await fetch(`${api}/sizes/get-data`, {
+                const response = await fetch(`${api}/size/get-data`, {
                     headers: { 'Content-Type': 'application/json' },
                 });
                 const content = await response.json();
@@ -56,7 +90,7 @@ function DIY(props) {
                 try {
                     const size = data[0];
                     setCost(c => c + size.price);
-                    setSizeRadio(size.name);
+                    setSizeRadio(size.slug);
                     setSizeArray(data);
                     setSizeLoading(true);
                 } catch (error) {
@@ -67,7 +101,7 @@ function DIY(props) {
     useEffect(() => {
         (
             async () => {
-                const response = await fetch(`${api}/bases/get-data`, {
+                const response = await fetch(`${api}/base/get-data`, {
                     headers: { 'Content-Type': 'application/json' },
                 });
                 const content = await response.json();
@@ -75,7 +109,7 @@ function DIY(props) {
                 try {
                     const base = data[0];
                     setCost(c => c + base.price);
-                    setBaseRadio(base.name);
+                    setBaseRadio(base.slug);
                     setBaseArray(data);
                     setBaseLoading(true);
                 } catch (error) {
@@ -86,7 +120,7 @@ function DIY(props) {
     useEffect(() => {
         (
             async () => {
-                const response = await fetch(`${api}/colors/get-data`, {
+                const response = await fetch(`${api}/color/get-data`, {
                     headers: { 'Content-Type': 'application/json' },
                 });
                 const content = await response.json();
@@ -94,7 +128,7 @@ function DIY(props) {
                 try {
                     const color = data[0];
                     setCost(c => c + color.price);
-                    setColorRadio(color.name);
+                    setColorRadio(color.slug);
                     setColorArray(data);
                     setColorLoading(true);
                 } catch (error) {
@@ -105,7 +139,7 @@ function DIY(props) {
     useEffect(() => {
         (
             async () => {
-                const response = await fetch(`${api}/flowers/get-data`, {
+                const response = await fetch(`${api}/flower/get-data`, {
                     headers: { 'Content-Type': 'application/json' },
                 });
                 const content = await response.json();
@@ -119,7 +153,7 @@ function DIY(props) {
     useEffect(() => {
         (
             async () => {
-                const response = await fetch(`${api}/addons/get-data`, {
+                const response = await fetch(`${api}/addon/get-data`, {
                     headers: { 'Content-Type': 'application/json' },
                 });
                 const content = await response.json();
@@ -130,10 +164,18 @@ function DIY(props) {
             })();
     }, []);
 
-    const onClick = async (event, diy) => {
+    const onClick = async (event) => {
         event.preventDefault();
-        if (!diy.flowerCheckbox.includes(true)) alert('Flower is required!')
+        if (!flowerCheckbox.includes(true)) alert('Flower is required!')
         else {
+            const flowers = flowerCheckbox.map((flower, index) => {
+                if (flower) return flowerArray[index];
+                else return null;
+            }).filter(flower => flower !== null);
+            const addons = addonCheckbox.map((addon, index) => {
+                if (addon) return addonArray[index];
+                else return null;
+            }).filter(addon => addon !== null);
             const response = await fetch(`${api}/cart/addToCart`, {
                 method: 'POST',
                 headers: {
@@ -141,7 +183,14 @@ function DIY(props) {
                 },
                 credentials: 'include',
                 withCredentials: true,
-                body: JSON.stringify({ diy: diy })
+                body: JSON.stringify({
+                    size: sizeRadio,
+                    base: baseRadio,
+                    color: colorRadio,
+                    flowers,
+                    addons,
+                    type: 'diy',
+                })
             });
             const content = await response.json();
             cart.setCart(content.data);
@@ -213,6 +262,7 @@ function DIY(props) {
                                 text="Depending on Availability"
                                 classes="bold"
                                 textAlign="center"
+                                href="/"
                             />
                         }
                         data={colorArray}
@@ -251,6 +301,7 @@ function DIY(props) {
                             <ParaText
                                 text="Optional"
                                 classes="bold"
+                                href="/"
                             />
                         }
                         type="checkbox"
@@ -282,7 +333,7 @@ function DIY(props) {
                 <div className="horizontal-center-margin">
                     <Button
                         to="/"
-                        onClick={event => onClick(event, { size: sizeRadio, base: baseRadio, color: colorRadio, flowerCheckbox: flowerCheckbox, addonCheckbox: addonCheckbox, flowerArray: flowerArray, addonArray: addonArray, cost: cost })}
+                        onClick={onClick}
                         text="Create"
                         classes="text-uppercase"
                     />

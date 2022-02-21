@@ -1,69 +1,94 @@
-import React, { useState } from 'react';
-import { Col, Container, Row } from 'react-bootstrap';
-import { Card, IconButton, CardContent, Button, CardMedia, InputAdornment, InputLabel, Input, FormControl } from '@material-ui/core';
-import { Email, Visibility, VisibilityOff, Lock } from '@material-ui/icons';
-import './Login.scss';
+import React, { useContext, useState } from 'react';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+import InputAdornment from '@mui/material/InputAdornment';
+import FormControl from '@mui/material/FormControl';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import { Col, Container, Row, Form } from 'react-bootstrap';
+import { Heading1 } from '../../components';
+import { useHistory } from 'react-router';
+import UserContext from '../../contexts/userContext';
 import api from '../../api';
-import url from '../../url';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import './Login.scss';
 
 function Login(props) {
-    document.title = props.title
+    const [email, setEmail] = useState({ name: '', errorText: '', error: false });
+    const [password, setPassword] = useState({ name: '', errorText: '', error: false, showPassword: false });
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const history = useHistory();
+
+    const user = useContext(UserContext);
 
     const handleClickShowPassword = _ => {
-        setShowPassword(!showPassword);
+        setPassword(prevState => ({ ...prevState, showPassword: !password.showPassword }));
     }
     const handleMouseDownPassword = event => {
         event.preventDefault();
     }
+    const changePassword = event => {
+        setPassword(prevState => ({ ...prevState, name: event.target.value }));
+    }
+
+    const changeEmail = event => {
+        setEmail(prevState => ({ ...prevState, name: event.target.value }));
+    }
+
     const handleSubmit = async e => {
         e.preventDefault();
-        const response = await fetch(`${api}/users/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            withCredentials: true,
-            body: JSON.stringify({ email: email, password: password })
-        });
-        const content = await response.json();
         try {
-            const user = content.data;
-            props.user.setUserState(user);
+            const response = await fetch(`${api}/user/login-admin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                withCredentials: true,
+                body: JSON.stringify({ email, password })
+            });
+            const content = await response.json();
+            if (content.error === "Email not verified") {
+                history.push("/__/auth/action?mode=emailNotVerified");
+            } else if (content.error) {
+                setEmail(prevState => ({ ...prevState, name: '', errorText: 'Invalid Credentials!', error: true }));
+                setPassword(prevState => ({ ...prevState, name: '', errorText: 'Invalid Credentials!', error: true, showPassword: false }));
+            } else {
+                const { displayName, email, emailVerified, admin } = content.data;
+                user.setUserState({ displayName, email, emailVerified, admin });
+            }
         } catch (error) {
-            props.user.setUserState(null);
         }
     }
 
     return (
-        <Container fluid className="admin-login-container">
+        <Container className="admin-login-container" fluid>
             <Row>
-                <Col className="admin-login-card">
+                <Col className="admin-login-card" md={4}>
                     <Card className="admin-login-base">
-                        <CardMedia
-                            className="login-logo"
-                            component="img"
-                            image={`${url}images/Flowerworks_Logo-Website.png`}
-                            title="Flowerworks"
+                        <Heading1
+                            first="Floweworks"
+                            classes="text-center"
                         />
-                        <CardContent>
-                            <form onSubmit={handleSubmit} autoComplete="off" noValidate>
+                        <CardContent className="admin-card-formcontrol">
+                            <Form onSubmit={handleSubmit} autoComplete="off" noValidate>
                                 <FormControl className="admin-card-formcontrol">
                                     <InputLabel htmlFor="email-admin">Email</InputLabel>
                                     <Input
                                         autoComplete="off"
                                         autoFocus
                                         type="email"
-                                        value={email}
-                                        onChange={e => setEmail(e.target.value)}
+                                        value={email.name}
+                                        onChange={changeEmail}
                                         id="email-admin"
                                         startAdornment={
                                             <InputAdornment position="start">
-                                                <Email />
+                                                <EmailIcon />
                                             </InputAdornment>
                                         }
                                     />
@@ -73,12 +98,12 @@ function Login(props) {
                                     <Input
                                         autoComplete="off"
                                         id="standard-adornment-password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
+                                        type={password.showPassword ? 'text' : 'password'}
+                                        value={password.name}
+                                        onChange={changePassword}
                                         startAdornment={
                                             <InputAdornment position="start">
-                                                <Lock />
+                                                <LockIcon />
                                             </InputAdornment>
                                         }
                                         endAdornment={
@@ -88,7 +113,7 @@ function Login(props) {
                                                     onClick={handleClickShowPassword}
                                                     onMouseDown={handleMouseDownPassword}
                                                 >
-                                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                                    {password.showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                                                 </IconButton>
                                             </InputAdornment>
                                         }
@@ -104,7 +129,7 @@ function Login(props) {
                                 <Button type="submit" variant="contained" color="primary" className="admin-login-button">
                                     Login
                                 </Button>
-                            </form>
+                            </Form>
                         </CardContent>
                     </Card>
                 </Col>

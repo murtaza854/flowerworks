@@ -38,7 +38,7 @@ function Signup(props) {
         if (!flag) setButtonState({
             disabled: false, onClick: async e => {
                 e.preventDefault();
-                const response = await fetch(`${api}/users/signup`, {
+                const response = await fetch(`${api}/user/signup`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -54,14 +54,9 @@ function Signup(props) {
                     })
                 });
                 const content = await response.json();
-                if (content.success === true) {
-                    const line1First = `Welcome ${firstName.value.trim()}! Your account has been created sucessfully.`
-                    const line1Third = `Please verify`;
-                    const line1Bold3 = email.value.trim();
-                    const line1Fourth = "to gain access to your account.";
-                    history.push('/account-creation', { line1First: line1First, line1Third: line1Third, line1Bold3: line1Bold3, line1Fourth: line1Fourth, success: true });
-                }
-                else history.push('/account-creation', { success: false, line1First: 'Error creating account!', line1Third: "Please contact support if this issue persists." });
+                if (content.success) history.push("/__/auth/action?mode=accountCreation");
+                else if (content.error.code === 'auth/email-already-in-use') alert(content.error.message);
+                else alert("Error creating account, please contact support if this issue persists.");
             }
         });
         else setButtonState({

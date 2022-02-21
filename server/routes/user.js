@@ -4,8 +4,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const firebaseFile = require('../firebase');
-const firebase = firebaseFile.firebase;
 const firebaseAdmin = firebaseFile.admin;
+const { signInWithEmailAndPassword, signOut, getAuth, createUserWithEmailAndPassword, sendEmailVerification, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, updateProfile, sendPasswordResetEmail } = require('firebase/auth');
 
 // const transporter = nodemailer.createTransport({
 //     host: 'smtp.yandex.com',
@@ -16,6 +16,8 @@ const firebaseAdmin = firebaseFile.admin;
 //       pass: 'flowerworks'
 //     }
 // });
+
+const auth = getAuth();
 
 function login(email, password) {
     return new Promise((resolve, reject) => {
@@ -83,7 +85,6 @@ router.post('/verify-email', async (req, res) => {
 });
 
 router.post('/change-password', async (req, res) => {
-    console.log(req.body);
     const user = firebase.auth().currentUser;
     const email = user.email;
     const newEmail = req.body.email;
@@ -94,10 +95,8 @@ router.post('/change-password', async (req, res) => {
     try {
         await user.reauthenticateWithCredential(credential);
         await user.updatePassword(req.body.password);
-        console.log('success');
         res.json({ data: true });
     } catch (error) {
-        console.log(error)
         res.json({ data: false });
     }
 });
@@ -139,15 +138,14 @@ router.get('/loggedIn', async (req, res) => {
 
 router.post('/logout', async (req, res) => {
     try {
-        await firebase.auth().signOut();
-        res.json({ loggedIn: false });
+        res.clearCookie("session");
+        res.json({ data: null });
     } catch (error) {
-        res.json({ loggedIn: false, error: error });
+        res.json({ data: null, error: error });
     }
 });
 
 router.post('/change-profile', async (req, res) => {
-    console.log(req.body);
     const user = firebase.auth().currentUser;
     const email = user.email;
     const newEmail = req.body.email;
@@ -158,7 +156,6 @@ router.post('/change-profile', async (req, res) => {
     try {
         await user.reauthenticateWithCredential(credential);
         const dbUser = await User.findOne({ uid: user.uid });
-        console.log(dbUser);
         await user.updateProfile({
             displayName: req.body.firstName
         })
@@ -178,31 +175,31 @@ router.post('/change-profile', async (req, res) => {
         const admin = idTokenResult.claims.admin;
         res.json({ data: 'success', emailChange: emailChange, user: { firstName: req.body.firstName, lastName: req.body.lastName, email: user.email, emailVerified: emailVerified, contactNumber: req.body.contactNumber, admin: admin } });
     } catch (error) {
-        console.log(error);
         res.json({ data: 'failed' });
     }
 });
 
 router.post('/signup', async (req, res) => {
     try {
-        const response = await firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password);
+        const { firstName, lastName, email, password, contactNumber } = req.body;
+        const response = await createUserWithEmailAndPassword(auth, email, password);
         const user = response.user;
         await firebaseAdmin.auth().setCustomUserClaims(user.uid, { admin: false });
-        user.sendEmailVerification();
-        await user.updateProfile({
-            displayName: req.body.firstName,
-        });
+        await sendEmailVerification(user);
+        await updateProfile(user, {
+            displayName: firstName,
+        })
         const newUser = new User({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            contactNumber: req.body.contactNumber,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            contactNumber: contactNumber,
             staff: false,
             active: true,
             uid: user.uid
         });
         newUser.save();
-        await firebase.auth().signOut();
+        await signOut(auth);
         res.json({ success: true });
     } catch (error) {
         res.json({ success: false, error: error });
@@ -232,6 +229,63 @@ router.post('/add', async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         res.json({ success: false, error: error });
+    }
+});
+
+router.post('/login-admin', async (req, res) => {
+    try {
+        const response = await signInWithEmailAndPassword(auth, req.body.email.name, req.body.password.name);
+        const user = response.user;
+        const userData = await User.findOne({ uid: user.uid });
+        console.log('userData');
+        if (!user.emailVerified) {
+            await sendEmailVerification(user);
+            throw "Email not verified";
+        }
+        if (!userData.active) {
+            throw new Error('User is not active');
+        }
+        if (!userData.staff) {
+            throw new Error('User is not staff');
+        }
+        const displayName = user.name;
+        const email = user.email;
+        const emailVerified = user.emailVerified || user.email_verified;
+        const admin = userData.staff;
+        const idToken = await user.getIdToken();
+        const expiresIn = 60 * 60 * 24 * 5 * 1000;
+        const sessionCookie = await firebaseAdmin.auth().createSessionCookie(idToken, { expiresIn });
+        const options = { maxAge: expiresIn, httpOnly: true, secure: true /* to test in localhost */ };
+        res.cookie("session", sessionCookie, options);
+        await signOut(auth);
+        res.json({ data: { displayName, email, emailVerified, admin } });
+    } catch (error) {
+        console.log(error);
+        res.json({ data: null, error: error });
+    }
+});
+
+router.get('/logged-in-admin', async (req, res) => {
+    try {
+        const sessionCookie = req.cookies.session || "";
+        if (sessionCookie) {
+            const user = await firebaseAdmin.auth().verifySessionCookie(sessionCookie, true);
+            if (user) {
+                const userData = await User.findOne({ uid: user.uid });
+                const displayName = user.name;
+                const email = user.email;
+                const emailVerified = user.emailVerified || user.email_verified;
+                const admin = userData.staff;
+                if (!emailVerified) {
+                    res.clearCookie("session");
+                    res.json({ data: { displayName, email, emailVerified, admin } });
+                } else {
+                    res.json({ data: { displayName, email, emailVerified, admin } });
+                }
+            } else res.json({ data: null });
+        } else res.json({ data: null });
+    } catch (error) {
+        res.json({ data: null, error: error });
     }
 });
 

@@ -1,34 +1,68 @@
-.sidebar {
-    .hamburger-icon {
-        position: absolute;
-        right: 0;
-        font-size: 3rem;
-        top: 0;
-        cursor: pointer;
+@import '../../global.scss';
+
+.client-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 300px;
+    background-color: #f9f9f9;
+    z-index: 999;
+    transform: translateX(-100%);
+    .logo {
+        width: 15rem;
+    }
+    .top-row {
+        padding-top: 2rem;
+    }
+    a {
+        color: #000;
+        width: fit-content;
+        text-decoration: none;
+        padding: 10px;
+        display: block;
+        transition: all 0.3s ease-in-out;
+        font-family: 'Raleway';
+        // font-size: $font-size-small;
+        margin-left: auto;
+        margin-right: auto;
+        opacity: 1;
+        &:hover {
+            // color: $primary-color;
+            opacity: 0.5;
+        }
     }
 }
 
-// X-Large devices (large desktops, less than 1400px)
-@media (max-width: 87.49875em) {
+.client-sidebar-not-active {
+    display: none;
 }
 
-// Large devices (desktops, less than 1200px)
-@media (max-width: 74.99875em) {
+.client-sidebar-open {
+    transform: translateX(-100%);
+    animation: slide-in-left .6s ease-in-out forwards;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-// Medium devices (tablets, less than 992px)
-@media (max-width: 61.99875em) {
+.client-sidebar-closed {
+    transform: translateX(0);
+    animation: slide-out-left .6s ease-in-out forwards;
 }
 
-// Small devices (landscape phones, less than 768px)
-@media (max-width: 47.99875em) {
+@keyframes slide-in-left {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
 }
 
-// X-Small devices (portrait phones, less than 576px)
-@media (max-width: 35.99875em) {
-    .sidebar {
-        .hamburger-icon {
-            font-size: 2rem;
-        }
+@keyframes slide-out-left {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
     }
 }

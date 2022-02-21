@@ -15,7 +15,6 @@ function ConfirmationMessage(props) {
     const [line1Fourth, setline1Fourth] = useState('');
     const [iconClass, setIconClass] = useState('');
     const user = useContext(UserContext);
-    console.log(props);
 
     
   useEffect(() => {
@@ -62,42 +61,6 @@ function ConfirmationMessage(props) {
         }
       })();
   }, [location, user, props]);
-
-    // useEffect(() => {
-    //     if (location.state && location.state.user) {
-    //         await fetch(`${api}/users/logout`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             credentials: 'include',
-    //             withCredentials: true,
-    //         });
-    //         user.setUserState(null);
-    //         setline1First("You have successfully been logged out!");
-    //         setline1Third("See you soon!");
-    //         setline1Bold3('');
-    //         setline1Fourth('');
-    //         setIconClass('fa fa-check');
-    //     }
-    //     else if (location.state && location.state === true) {
-    //         setline1First(location.state.line1First);
-    //         setline1Third(location.state.line1Third);
-    //         setline1Bold3(location.state.line1Bold3);
-    //         setline1Fourth(location.state.line1Fourth);
-    //         setIconClass('fa fa-check');
-    //     } else if (location.state && location.state.success === false) {
-    //         setline1First(location.state.line1First);
-    //         setline1Third(location.state.line1Third);
-    //         setline1Bold3('');
-    //         setline1Fourth('');
-    //         setIconClass('fa fa-times');
-    //     } else {
-    //         setline1First("Error performing this operation!");
-    //         setline1Third("Please contact support if this issue persists.");
-    //         setline1Bold3('');
-    //         setline1Fourth('');
-    //         setIconClass('fa fa-times');
-    //     }
-    // }, [location, user])
 
     return (
         <Container className="confirmation-message">

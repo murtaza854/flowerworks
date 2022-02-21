@@ -3,12 +3,12 @@ const dotenv = require('dotenv');
 dotenv.config();
 const mongoose = require('mongoose');
 const User = require('./schema').user;
-
 const firebaseFile = require('./firebase');
-const firebase = firebaseFile.firebase;
 const firebaseAdmin = firebaseFile.admin;
-
+const { signInWithEmailAndPassword, signOut, getAuth, createUserWithEmailAndPassword, sendEmailVerification, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, updateProfile, sendPasswordResetEmail } = require('firebase/auth');
 const url = process.env.DATABASE_URL;
+
+const auth = getAuth();
 
 const createServer = async (callback) => {
     await mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -28,23 +28,24 @@ const createServer = async (callback) => {
         console.log('Passwords do not match... aborting!');
         process.exit(0);
     };
-    const response = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    const response = await createUserWithEmailAndPassword(auth, email, password);
     const user = response.user;
     await firebaseAdmin.auth().setCustomUserClaims(user.uid, { admin: true });
-    user.sendEmailVerification();
-    await user.updateProfile({
+    await sendEmailVerification(user);
+    await updateProfile(user, {
         displayName: firstName,
-    });
-    // console.log(user);
+    })
     const newUser = new User({
         firstName: firstName,
         lastName: lastName,
         email: email,
         contactNumber: contactNumber,
         staff: true,
+        active: true,
         uid: user.uid
     });
     await newUser.save();
+    await signOut(auth);
     console.log('Verification Email sent! Please verify to login');
     process.exit(0);
 

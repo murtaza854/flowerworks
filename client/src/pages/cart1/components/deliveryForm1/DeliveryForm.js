@@ -4,14 +4,13 @@ import { Button, Heading1 } from '../../../../components';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import './DeliveryForm.scss';
-import CheckBoxOutlineBlankOutlinedIcon from '@material-ui/icons/CheckBoxOutlineBlankOutlined';
-import { Checkbox, FormControlLabel } from '@material-ui/core';
-import CheckBoxOutlinedIcon from '@material-ui/icons/CheckBoxOutlined';
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
+import { Checkbox, FormControlLabel } from '@mui/material';
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {
     useHistory,
-  } from "react-router-dom";
-import api from '../../../../api';
+} from "react-router-dom";
 import UserContext from '../../../../authenticatedUser';
 
 function DeliveryForm(props) {
@@ -31,28 +30,7 @@ function DeliveryForm(props) {
     });
     const user = useContext(UserContext);
     const todayDate = new Date();
-    // const location = useLocation();
-    // const query = new URLSearchParams(location.search);
-    // console.log(query.get("h"));
     const history = useHistory();
-
-    const [areas, setAreas] = useState([]);
-
-    useEffect(() => {
-        (
-            async () => {
-                const response = await fetch(`${api}/areas/getAreas`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    withCredentials: true,
-                });
-                const content = await response.json();
-                setAreas(content.data);
-            })();
-    }, []);
 
     const [firstName, setFirstName] = useState({ value: '', errorText: '', error: false, readOnly: false });
     const [lastName, setLastName] = useState({ value: '', errorText: '', error: false, readOnly: false });
@@ -64,7 +42,7 @@ function DeliveryForm(props) {
     const [phoneNumber1, setPhoneNumber1] = useState({ value: '', errorText: '', error: false, readOnly: false });
     const [email1, setEmail1] = useState({ value: '', errorText: '', error: false, readOnly: false });
 
-    const [area, setArea] = useState({ value: '-', errorText: '', error: false });
+    const [area, setArea] = useState({ value: '', errorText: '', error: false });
     const [addressLine1, setAddressLine1] = useState({ value: '', errorText: '', error: false });
     const [landmark, setLandmark] = useState({ value: '' });
     const [addressLine2, setAddressLine2] = useState({ value: '' });
@@ -123,9 +101,8 @@ function DeliveryForm(props) {
     }
 
     const changeArea = event => {
-        setArea(prevState => ({ ...prevState, value: event.target.value }));
-        if (event.target.value === '-') setArea(prevState => ({ ...prevState, errorText: 'Area is required!', error: true }));
-        else setArea(prevState => ({ ...prevState, errorText: '', error: false }));
+        if (event.target.value === '') setArea({ value: event.target.value, errorText: 'Area is required!', error: true });
+        else setArea({ value: event.target.value, errorText: '', error: false });
     }
     const changeAddressLine1 = event => {
         setAddressLine1(prevState => ({ ...prevState, value: event.target.value }));
@@ -158,12 +135,11 @@ function DeliveryForm(props) {
     }
 
     useEffect(() => {
-        console.log(user);
         try {
-            setFirstName({ value: user.firstName, errorText: '', error: false, readOnly: true });
-            setLastName({ value: user.lastName, errorText: '', error: false, readOnly: true });
-            setPhoneNumber({ value: user.contactNumber, errorText: '', error: false, readOnly: true });
-            setEmail({ value: user.email, errorText: '', error: false, readOnly: true });
+            setFirstName({ value: user.userState.firstName, errorText: '', error: false, readOnly: true });
+            setLastName({ value: user.userState.lastName, errorText: '', error: false, readOnly: true });
+            setPhoneNumber({ value: user.userState.contactNumber, errorText: '', error: false, readOnly: true });
+            setEmail({ value: user.userState.email, errorText: '', error: false, readOnly: true });
         } catch (error) {
             setFirstName({ value: '', errorText: '', error: false, readOnly: false });
             setLastName({ value: '', errorText: '', error: false, readOnly: false });
@@ -213,23 +189,24 @@ function DeliveryForm(props) {
         else if (date.value === '') flag = false;
         else if (date.value === undefined) flag = false;
         if (flag) {
-            history.push('/cart/pay-send', {
-                firstName: firstName,
-                lastName: lastName,
-                phoneNumber: phoneNumber,
-                email: email,
-                firstName1: firstName1,
-                lastName1: lastName1,
-                phoneNumber1: phoneNumber1,
-                email1: email1,
-                area: area,
-                addressLine1: addressLine1,
-                addressLine2: addressLine2,
-                date: date,
-                landmark: landmark,
-                message: message,
+            let data = {
+                firstName: firstName.value,
+                lastName: lastName.value,
+                phoneNumber: phoneNumber.value,
+                email: email.value,
+                firstName1: firstName1.value,
+                lastName1: lastName1.value,
+                phoneNumber1: phoneNumber1.value,
+                email1: email1.value,
+                area: area.value,
+                addressLine1: addressLine1.value,
+                addressLine2: addressLine2.value,
+                date: date.value,
+                landmark: landmark.value,
+                message: message.value,
                 checkBoxes: checkBoxes
-            })
+            }
+            history.push(`/cart/pay-send?data=${JSON.stringify(data)}`);
         } else alert('Fill Delivery Form!')
     }
 
@@ -251,9 +228,10 @@ function DeliveryForm(props) {
                     />
                 </Row>
                 <Row className="justify-content-between">
-                    <Form.Group as={Col} md={5} controlId="firstName">
+                    <Form.Group as={Col} md={5} controlId="firstName-your">
                         <Form.Label>First Name:</Form.Label>
-                        <Form.Control type="text"
+                        <Form.Control
+                            type="text"
                             value={firstName.value}
                             readOnly={firstName.readOnly}
                             onChange={changeFirstName}
@@ -261,9 +239,10 @@ function DeliveryForm(props) {
                         />
                         <div className="error-text">{firstName.errorText}</div>
                     </Form.Group>
-                    <Form.Group as={Col} md={5} controlId="lastName">
+                    <Form.Group as={Col} md={5} controlId="lastName-your">
                         <Form.Label>Last Name:</Form.Label>
-                        <Form.Control type="text"
+                        <Form.Control
+                            type="text"
                             value={lastName.value}
                             readOnly={lastName.readOnly}
                             onChange={changeLastName}
@@ -273,9 +252,10 @@ function DeliveryForm(props) {
                     </Form.Group>
                 </Row>
                 <Row className="justify-content-between">
-                    <Form.Group as={Col} md={5} controlId="phoneNumber">
+                    <Form.Group as={Col} md={5} controlId="phoneNumber-your">
                         <Form.Label>Phone Number:</Form.Label>
-                        <Form.Control type="text"
+                        <Form.Control
+                            type="text"
                             value={phoneNumber.value}
                             readOnly={phoneNumber.readOnly}
                             onChange={changePhoneNumber}
@@ -283,9 +263,10 @@ function DeliveryForm(props) {
                         />
                         <div className="error-text">{phoneNumber.errorText}</div>
                     </Form.Group>
-                    <Form.Group as={Col} md={5} controlId="email">
+                    <Form.Group as={Col} md={5} controlId="email-your">
                         <Form.Label>Email Address:</Form.Label>
-                        <Form.Control type="text"
+                        <Form.Control
+                            type="text"
                             value={email.value}
                             readOnly={email.readOnly}
                             onChange={changeEmail}
@@ -367,17 +348,11 @@ function DeliveryForm(props) {
                     <Form.Group as={Col} md={5} controlId="area">
                         <Form.Label>Area:</Form.Label>
                         <Form.Control
+                            type="text"
                             value={area.value}
                             onChange={changeArea}
                             onBlur={changeArea}
-                            as="select" type="text">
-                            <option value="-">-</option>
-                            {areas.map((obj, index) => {
-                                return (
-                                    <option key={index} value={obj.name}>{obj.name}</option>
-                                )
-                            })}
-                        </Form.Control>
+                        />
                         <div className="error-text">{area.errorText}</div>
                     </Form.Group>
                     <Form.Group as={Col} md={5} controlId="addressLine1">
@@ -451,10 +426,6 @@ function DeliveryForm(props) {
                 <Row>
                     <div className="horizontal-center-margin">
                         <Button
-                            // cartForm={3}
-                            // canSubmit={props.canSubmit}
-                            // setActive={props.setActive}
-                            // setActiveCompClass={props.setActiveCompClass}
                             onClick={onClick}
                             to="/"
                             text="Proceed"

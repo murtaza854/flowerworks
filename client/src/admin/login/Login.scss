@@ -1,7 +1,14 @@
+@import '../../global.scss';
+
 .admin-login-container {
     // padding: 0;
+    img {
+        height: inherit;
+        position: absolute;
+        right: 0;
+    }
     position: relative;
-    background: black;
+    // background: $primary-color;
     // background: white;
     // overflow: hidden;
     height: 100vh;
@@ -29,6 +36,9 @@
     .admin-card-formcontrol {
         margin: 10px 0;
         width: 100%;
+        label {
+            transform: translate(0, -9px) scale(0.75);
+        }
     }
     .admin-login-base {
         padding: 50px 30px;

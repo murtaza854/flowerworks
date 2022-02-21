@@ -1,9 +1,9 @@
 import React from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
-import CheckBoxOutlineBlankOutlinedIcon from '@material-ui/icons/CheckBoxOutlineBlankOutlined';
-import { RadioGroup, Radio, FormControlLabel, Checkbox } from '@material-ui/core';
-import CheckBoxOutlinedIcon from '@material-ui/icons/CheckBoxOutlined';
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
+import { RadioGroup, Radio, FormControlLabel, Checkbox } from '@mui/material';
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import './RadioBox.scss';
 
 function RadioBox(props) {
@@ -24,11 +24,10 @@ function RadioBox(props) {
     const handleRadioChange = event => {
         const array = props.data;
         const oldState = props.dataState;
-        const objOld = array.find(obj => obj.name === oldState);
-        const objNew = array.find(obj => obj.name === event.target.value);
+        const objOld = array.find(obj => obj.slug === oldState);
+        const objNew = array.find(obj => obj.slug === event.target.value);
         props.setCost(c => (c - objOld.price) + objNew.price);
-        // console.log(props.dataState);
-        props.setData(event.target.value);
+        props.setData(objNew.slug);
     };
     const handleCheckboxChange = (position) => {
         const array = props.data;
@@ -58,7 +57,6 @@ function RadioBox(props) {
         props.setCost(c => (c - oldPrice) + newPrice);
         props.setData(updatedCheckedState);
     };
-    // console.log(props.dataState);
     return (
         <div className="radio-box">
             {props.heading}
@@ -75,7 +73,7 @@ function RadioBox(props) {
                                         return (
                                             <li key={index}>
                                                 <FormControlLabel
-                                                    value={value.name}
+                                                    value={value.slug}
                                                     control={
                                                         <Radio
                                                             disableRipple={true}

@@ -6,7 +6,7 @@ function Heading2(props) {
     return (
         <div className="heading2">
             <p className={props.classes}>
-                {props.first} <strong><Link style={{color: 'black'}} to={props.link}>{props.linkTag}</Link></strong> <strong>{props.bold}</strong> <span className={props.discountClass}>{props.second}</span> <strong className="discount">{props.discountAvailable}</strong>
+                {props.first} <strong><Link style={{ color: 'black' }} to={props.link}>{props.linkTag}</Link></strong> <strong>{props.bold}</strong> <span className={props.discountClass}>{props.second}</span> <strong className="discount">{props.discountAvailable}</strong>
             </p>
             <p className={props.classes}>
                 {props.third} <strong>{props.bold3}</strong> {props.forth}

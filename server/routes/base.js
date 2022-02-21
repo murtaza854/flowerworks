@@ -4,107 +4,103 @@ const Product = require('../schema').product;
 const multer = require('multer');
 const fs = require('fs');
 const slugify = require('slugify');
+const path = require('path');
 
 const storage = multer.diskStorage({
-    destination: '../client/public/bases',
+    destination: (req, file, cb) => {
+        // cb(null, path.resolve('../client/public/bases'));
+        cb(null, path.resolve('./build/bases'));
+    },
     filename: (req, file, cb) => {
-      cb(null, `${file.originalname}`);
+        const ext = path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + Date.now() + ext);
     }
 });
-    
-var upload = multer({storage: storage});
 
-router.get('/TableData', async (req, res) => {
-    if ('excludeID' in req.query) bases = await Base.find({}, {_id: 0});
-    else  bases = await Base.find({});
-    if (!bases) res.json({data: []});
-    else res.json({data: bases});
+var upload = multer({ storage: storage });
+
+router.get('/getAllBases', async (req, res) => {
+    const bases = await Base.find({});
+    res.json({ data: bases });
+});
+
+router.get('/client-getAll', async (req, res) => {
+    const bases = await Base.find({ active: true }, { _id: 0 });
+    res.json({ data: bases });
 });
 
 router.get('/get-data', async (req, res) => {
-    const bases = [
-        { name: 'Bouquet', price: 100 },
-        { name: 'Box', price: 200 },
-        { name: 'Basket', price: 300 },
-        { name: 'Acrylic Box', price: 400 },
-    ];
-    res.json({data: bases});
+    const bases = await Base.find({ active: true }, { _id: 0 });
+    res.json({ data: bases });
 });
 
-router.post('/add', upload.single('file'), async (req, res) => {
-    const file = req.file;
-    if (file) {
+router.post('/add', upload.single('image'), async (req, res) => {
+    try {
         const data = JSON.parse(req.body.data);
-        const newBase = new Base({
+        const base = new Base({
             name: data.name,
             slug: slugify(data.name, { lower: true }),
             price: data.price,
-            imagePath: `/bases/${file.filename}`
+            image: '/bases/' + req.file.filename,
+            fileName: req.file.filename,
+            active: data.active
         });
-        newBase.save();
-        res.json({data: 'success'});
-    } else {
-        res.json({data: 'failed'});
+        await base.save();
+        res.json({ data: base });
+    } catch (error) {
+        res.json({ data: null, error: error });
     }
 });
 
-router.post('/update', upload.single('file'), async (req, res) => {
+router.post('/update', upload.single('image'), async (req, res) => {
     const file = req.file;
     const data = JSON.parse(req.body.data);
-    const base = await Base.findOne({_id: data._id});
-    base.name = data.name;
-    base.slug = slugify(data.name, { lower: true });
-    base.price = data.price;
-    if (file) {
-        try {
-            await fs.unlinkSync(`../client/public${base.imagePath}`);
-            base.imagePath = `/bases/${file.filename}`;
-        } catch (error) {
-            console.error('there was an error:', error.message);
+    try {
+        const base = await Base.findById(data.id);
+        base.name = data.name;
+        base.slug = slugify(data.name, { lower: true });
+        base.price = data.price;
+        if (file) {
+            // fs.unlinkSync(path.resolve('../client/public/bases/' + base.fileName));
+            fs.unlinkSync(path.resolve('./build/bases/' + base.fileName));
+            base.fileName = file.filename;
+            base.image = '/bases/' + file.filename;
         }
+        base.active = data.active;
+        await base.save();
+        res.json({ data: true });
+    } catch (error) {
+        res.json({ data: null, error: error });
     }
-    base.save();
-    res.json({data: 'success'});
 });
 
-router.get('/getByIds', async (req, res) => {
-    let id = '';
-    if ('id' in req.query) id = req.query.id;
-    const getIds = id.split(',');
-    const bases = await Base.find({_id: getIds});
-    const merged = [];
-    for (let i = 0; i < bases.length; i++) {
-        const base = bases[i];
-        const products = await Product.find({base: base});
-        merged.push({
-            name: base.name,
-            products:products
-        });
+router.post('/getById', async (req, res) => {
+    try {
+        const base = await Base.findById(req.body.id);
+        res.json({ data: base });
+    } catch (error) {
+        res.json({ data: null, error: error });
     }
-    if (!merged) res.json({data: []});
-    else res.json({data: merged});
 });
 
-router.post('/delete', async (req, res) => {
-    const bases = await Base.find({_id: req.body.ids});
-    bases.forEach(async base => {
-        const products = await Product.find({base: base});
-        products.forEach(async product => {
-            try {
-                await fs.unlinkSync(`../client/public${product.imagePath}`);
-            } catch (error) {
-                console.error('there was an error:', error.message);
-            }
-        });
-        await Product.deleteMany({base: base});
-        try {
-            await fs.unlinkSync(`../client/public${base.imagePath}`);
-        } catch (error) {
-            console.error('there was an error:', error.message);
+router.get('/action', async (req, res) => {
+    try {
+        const ids = JSON.parse(req.query.ids);
+        const updateString = req.query.updateString;
+        const strings = updateString.split('_');
+        const isTrueSet = (strings[1] === 'true');
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            const base = await Base.findById(id);
+            if (strings[0] === 'active') base.active = isTrueSet;
+            await base.save();
         }
-    });
-    await Base.deleteMany({_id: req.body.ids});
-    res.json({data: 'success'});
+        res.json({ data: 'success' });
+    } catch (error) {
+        res.status(500).json({
+            error
+        });
+    }
 });
 
 module.exports = router;

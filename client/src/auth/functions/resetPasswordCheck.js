@@ -1,7 +1,7 @@
 import api from "../../api";
 
 export default async function resetPasswordCheck(actionCode) {
-    const response = await fetch(`${api}/users/reset-password-check`, {
+    const response = await fetch(`${api}/auth/reset-password-check`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -1,58 +1,71 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Login, AdminLayout } from '../admin';
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import UserContext from '../authenticatedUser';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import './Admin.scss';
+import UserContext from '../contexts/userContext';
+import api from '../api';
+
 
 function Admin(props) {
-  const [darkState, setDarkState] = useState(false);
-  const user = useContext(UserContext);
-  const darkTheme = createTheme({
-    palette: {
-      type: "dark",
-      primary: {
-        main: '#757575',
-      },
-      secondary: {
-        main: '#000000',
-      },
-      error: {
-        main: '#c31200',
-      },
-      typography: {
-        fontFamily: 'Raleway',
-      },
-    },
-  });
-  const lightTheme = createTheme({
-    palette: {
-      type: "light",
-      primary: {
-        main: '#000000',
-      },
-      secondary: {
-        main: '#757575',
-      },
-      error: {
-        main: '#c31200',
-      },
-      typography: {
-        fontFamily: 'Raleway',
-      },
-    },
-  });
-  const currentTheme = darkState ? darkTheme : lightTheme;
+    const [userState, setUserState] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const user = useContext(UserContext);
 
-  if (props.loading) return <div></div>
+    const lightTheme = createTheme({
+        palette: {
+            type: 'light',
+            primary: {
+                main: '#000000',
+            },
+            secondary: {
+                main: '#f9f9f9',
+            },
+        },
+        typography: {
+            fontFamily: 'Raleway',
+        },
+    });
 
-  return (
-    <ThemeProvider theme={currentTheme}>
-      {!user.userState ? (
-        <Login user={user} title="Flowerworks: Admin Login" />
-      ) : (
-        <AdminLayout user={user} darkState={darkState} setDarkState={setDarkState} title="Flowerworks: Dashboard" />
-      )}
-    </ThemeProvider>
-  );
+
+
+    useEffect(() => {
+        (
+            async () => {
+                try {
+                    const response = await fetch(`${api}/user/logged-in-admin`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        withCredentials: true,
+                    });
+                    const content = await response.json();
+                    const user = content.data;
+                    const { displayName, email, emailVerified, admin } = user;
+                    setUserState({ displayName, email, emailVerified, admin });
+                    setLoading(false);
+                } catch (error) {
+                    setUserState(null);
+                    setLoading(false);
+                }
+            })();
+    }, []);
+
+    if (loading) return <div></div>;
+
+    return (
+        <UserContext.Provider value={{ userState: userState, setUserState: setUserState }}>
+            <ThemeProvider theme={lightTheme}>
+                {/* <Login setToken={setToken} title="Mzushi: Admin Login" /> */}
+                {!userState ? (
+                    <Login title="Floweworks: Admin Login" />
+                ) : (
+                    <AdminLayout user={user} />
+                )}
+            </ThemeProvider>
+        </UserContext.Provider >
+    );
 }
 
 export default Admin;

@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import CheckBoxOutlineBlankOutlinedIcon from '@material-ui/icons/CheckBoxOutlineBlankOutlined';
-import { Radio, FormControlLabel, RadioGroup } from '@material-ui/core';
-import CheckBoxOutlinedIcon from '@material-ui/icons/CheckBoxOutlined';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
+import { Radio, FormControlLabel, RadioGroup } from '@mui/material';
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { Button, ParaText, Heading2 } from '../../../../components';
 import {
     useHistory,
@@ -11,8 +11,6 @@ import {
 } from "react-router-dom";
 import './Payment.scss'
 import api from '../../../../api';
-import DiscountContext from '../../../../discountContext';
-import CartContext from '../../../../share';
 
 function Payment(props) {
     const theme = createTheme({
@@ -31,11 +29,12 @@ function Payment(props) {
     });
     const [display, setDisplay] = useState('none');
     const [radioBoxes, setRadioBoxes] = useState({ method: 'Cash on Delivery' });
-    const discount = useContext(DiscountContext);
-    const cart = useContext(CartContext);
 
     const location = useLocation();
     const history = useHistory();
+    
+    const query = new URLSearchParams(location.search);
+    const data = query.get('data') || null;
 
     const handleChange = (event) => {
         setRadioBoxes({ method: event.target.value });
@@ -44,23 +43,16 @@ function Payment(props) {
     };
 
     useEffect(() => {
-        if (location.state === undefined) {
+        if (data === null) {
             alert('Fill delivery form!')
             history.push('/cart/delivery-info');
         }
-    }, [history, location.state])
+    }, [history, data])
 
     const onClick = async event => {
         event.preventDefault();
-        let orderDiscount = null;
-        if (discount && discount.type === 'Bill') {
-            const cartCurrentPrice = cart.cartObj.cartTotalPrice
-            if (cartCurrentPrice >= discount.minAmount && cartCurrentPrice <= discount.maxAmount) {
-                orderDiscount = discount
-            }
-        } else if (discount && discount.type === 'DIY') orderDiscount = discount
-        else if (discount && discount.type === 'Product') orderDiscount = discount
-        const response = await fetch(`${api}/orders/confirmOrder`, {
+        const deliveryDetails = JSON.parse(data);
+        const response = await fetch(`${api}/order/confirmOrder`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -68,27 +60,12 @@ function Payment(props) {
             credentials: 'include',
             withCredentials: true,
             body: JSON.stringify({
-                firstName: location.state.firstName,
-                lastName: location.state.lastName,
-                phoneNumber: location.state.phoneNumber,
-                email: location.state.email,
-                firstName1: location.state.firstName1,
-                lastName1: location.state.lastName1,
-                phoneNumber1: location.state.phoneNumber1,
-                email1: location.state.email1,
-                area: location.state.area,
-                addressLine1: location.state.addressLine1,
-                landmark: location.state.landmark,
-                addressLine2: location.state.addressLine2,
-                date: location.state.date,
-                message: location.state.message,
-                checkBoxes: location.state.checkBoxes,
-                radioBoxes: radioBoxes,
-                discount: orderDiscount
+                deliveryDetails,
+                radioBoxes
             })
         });
         const content = await response.json();
-        if (content.data === 'success') history.push('/thankyou');
+        if (content.data === 'success') history.push(`/thankyou/${content.orderNumber}`);
         else history.push('/');
     }
 
@@ -135,41 +112,40 @@ function Payment(props) {
                             />
                             <div className="global-mt-3"></div>
                             <ParaText
-                                text="Bank name"
+                                text="Muslim Commercial Bank (MCB)"
                                 classes="bold margin-bottom-0"
+                                href="/"
                             />
                             <ParaText
-                                text="Account Title: Some Name"
+                                text="Account Title: Kinza Asif"
                                 classes="margin-bottom-0"
+                                href="/"
                             />
                             <ParaText
-                                text="Account Number: Some number"
+                                text="Account Number: 1049953781007946"
                                 classes="margin-bottom-0"
+                                href="/"
                             />
                             <ParaText
-                                text="IBAN"
-                            />
-                            <div className="global-mt-3"></div>
-                            <ParaText
-                                text="Bank name"
-                                classes="bold margin-bottom-0"
-                            />
-                            <ParaText
-                                text="Account Title: Some Name"
-                                classes="margin-bottom-0"
-                            />
-                            <ParaText
-                                text="Account Number: Some number"
-                                classes="margin-bottom-0"
-                            />
-                            <ParaText
-                                text="IBAN"
+                                text="PK 32 MUCB 1049953781007946"
+                                href="/"
                             />
                             <div className="global-mt-3"></div>
                             <ParaText
                                 text="Proof of payment with order number must be emailed at "
                                 link="info@flowerworks.pk"
+                                text2="."
                                 href="mailto:info@flowerworks.pk"
+                                textAlign="center"
+                                target="_blank"
+                                rel="noreferrer"
+                                classes="margin-bottom-0"
+                            />
+                            <ParaText
+                                text="You may also send proof of payment to our whatsapp number, "
+                                link="0334 3214311"
+                                text2="."
+                                href="https://wa.me/+923343214311"
                                 textAlign="center"
                                 target="_blank"
                                 rel="noreferrer"
@@ -182,29 +158,6 @@ function Payment(props) {
             <Row>
                 <div className="horizontal-center-margin">
                     <Button
-                        // firstName={firstName}
-                        // lastName={lastName}
-                        // phoneNumber={phoneNumber}
-                        // email={email}
-
-                        // firstName1={firstName1}
-                        // lastName1={lastName1}
-                        // phoneNumber1={phoneNumber1}
-                        // email1={email1}
-
-                        // area={area}
-                        // addressLine1={addressLine1}
-                        // landmark={landmark}
-                        // addressLine2={addressLine2}
-
-                        // date={date}
-                        // message={message}
-
-                        // checkBoxes={checkBoxes}
-
-                        // radioBoxes={radioBoxes}
-
-                        // cartForm={4}
                         onClick={onClick}
                         to="/"
                         text="Send"

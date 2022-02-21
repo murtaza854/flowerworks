@@ -1,4 +1,4 @@
-const api = 'http://localhost:4000/api';
-// const api = 'https://flowerworks.pk/api';
+// const api = 'http://localhost:3006/api';
+const api = 'https://flowerworks.pk/api';
 
 export default api;

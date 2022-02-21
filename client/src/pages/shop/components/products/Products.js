@@ -24,7 +24,7 @@ function Products(props) {
     useEffect(() => {
         (
             async () => {
-                const response = await fetch(`${api}/products/count`, {
+                const response = await fetch(`${api}/product/count`, {
                     headers: { 'Content-Type': 'application/json' },
                 });
                 const content = await response.json();
@@ -53,42 +53,89 @@ function Products(props) {
     useEffect(() => {
         (
             async () => {
-                const response = await fetch(`${api}/products/shop?page=${page}`, {
+                const response = await fetch(`${api}/product/shop?page=${page}&category=${category}`, {
                     headers: { 'Content-Type': 'application/json' },
                 });
                 const content = await response.json();
                 const data = content.data;
+                const coupons = content.coupons;
                 const htmlData = [];
-                const onClick = async (event, productSlug) => {
-                    event.preventDefault();
-                    const response = await fetch(`${api}/cart/addToCart`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        withCredentials: true,
-                        body: JSON.stringify({ productSlug: productSlug })
-                    });
-                    const content = await response.json();
-                    cart.setCart(content.data);
-                }
-                data.forEach(obj => {
-                    const discObj = discountedProducts.find(prod => obj.slug === prod.item.slug);
-                    if (discObj) {
-                        const discountedPrice = ((100 - discObj.discountPercentage) / 100) * obj.price;
-                        htmlData.push(
-                            <Col key={obj.slug} md={4} className="spacing">
-                                <Card classes="center-relative fit-content" classes1="spacing-between" button={<Button to={`${category}/${obj.slug}`} text="Quick view" classes="text-uppercase" />} button1={<Button to="/" onClick={event => onClick(event, obj.slug)} text="Add to cart" classes="text-uppercase" />} price={`PKR - ${obj.price}`} discountedPrice={`PKR - ${discountedPrice}`} discountClass="discounted" src={obj.imagePath} alt="box" />
-                            </Col>
-                        );
-                    } else {
-                        htmlData.push(
-                            <Col key={obj.slug} md={4} className="spacing">
-                                <Card classes="center-relative fit-content" classes1="spacing-between" button={<Button to={`${category}/${obj.slug}`} text="Quick view" classes="text-uppercase" />} button1={<Button to="/" onClick={event => onClick(event, obj.slug)} text="Add to cart" classes="text-uppercase" />} price={`PKR - ${obj.price}`} src={obj.imagePath} alt="box" />
-                            </Col>
-                        );
+                let coupon = null;
+                for (let i = 0; i < coupons.length; i++) {
+                    const couponFromArray = coupons[i];
+                    if (couponFromArray.redeemBy && new Date(couponFromArray.redeemBy) >= new Date()) {
+                        coupon = couponFromArray;
+                        break;
                     }
+                }
+                if (!coupon && coupons.length > 0) coupon = coupons[0];
+                let productCouponSlugs = [];
+                if (coupon && coupon.products.length > 0) productCouponSlugs = coupon.products.map((prod) => prod.slug);
+                data.forEach(obj => {
+                    let pricesArray = [];
+                    let minPrice = 0;
+                    let maxPrice = 0;
+                    let minDiscountedPrice = null;
+                    let maxDiscountedPrice = null;
+                    // let value = null;
+                    if (obj.sizes && obj.sizes.length > 0) {
+                        obj.sizes.forEach(size => {
+                            pricesArray.push(size.price);
+                        });
+                        minPrice = Math.min(...pricesArray);
+                        maxPrice = Math.max(...pricesArray);
+                    }
+                    if (coupon) {
+                        let flag = true;
+                        if (coupon.redeemBy && new Date(coupon.redeemBy) < new Date()) flag = false;
+                        if (coupon.maxRedemptions && coupon.maxRedemptions <= coupon.timesRedeeemed) flag = false;
+                        if (flag && !coupon.hasPromotionCodes) {
+                            if (coupon.appliedToProducts && productCouponSlugs.includes(obj.slug)) {
+                                if (coupon.type === 'Fixed Amount Discount') {
+                                    minDiscountedPrice = (minPrice - coupon.amountOff) < 0 ? 0 : minPrice - coupon.amountOff;
+                                    maxDiscountedPrice = (maxPrice - coupon.amountOff) < 0 ? 0 : maxPrice - coupon.amountOff;
+                                    // value = `PKR.${coupon.amountOff}`;
+                                } else {
+                                    minDiscountedPrice = (minPrice - (minPrice * (coupon.percentOff / 100))).toFixed(2);
+                                    maxDiscountedPrice = (maxPrice - (maxPrice * (coupon.percentOff / 100))).toFixed(2);
+                                    // value = `${coupon.percentOff}%`;
+                                }
+                            }
+                        }
+                    }
+                    let price = '';
+                    let discountedPrice = null;
+                    let discountClass = '';
+                    if (minPrice === maxPrice) {
+                        price = `PKR.${minPrice}`;
+                    } else {
+                        price = `PKR.${minPrice} to PKR.${maxPrice}`;
+                    }
+                    if (minDiscountedPrice !== null) {
+                        discountClass = 'discounted';
+                        if (minDiscountedPrice === maxDiscountedPrice) {
+                            discountedPrice = `PKR.${minDiscountedPrice}`;
+                        } else {
+                            discountedPrice = `PKR.${minDiscountedPrice} to PKR.${maxDiscountedPrice}`;
+                        }
+                    }
+                    htmlData.push(
+                        <Col key={obj.slug} md={4} className="spacing">
+                            <Card classes="center-relative fit-content"
+                                classes1="spacing-between"
+                                button={
+                                    <Button to={`${category}/${obj.slug}`}
+                                        text="Quick view" classes="text-uppercase" />}
+                                discountedPrice={discountedPrice}
+                                discountClass={discountClass}
+                                button1=""
+                                price={price}
+                                src={obj.image}
+                                alt="box"
+                            />
+                        </Col>
+                    );
+                    // }
                 });
                 setProductsArray(htmlData);
             })();

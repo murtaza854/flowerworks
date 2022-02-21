@@ -1,0 +1,14 @@
+@import '../global.scss';
+
+.auth {
+    text-align: center;
+    height: 50vh;
+    img {
+        width: 18rem;
+    }
+    a {
+        font-weight: 700;
+        color: black;
+        text-decoration: none;
+    }
+}

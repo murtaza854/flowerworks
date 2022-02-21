@@ -3,43 +3,58 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { Heading1, Heading2, ParaText, Heading3, Button } from '../../../../components';
 import CartContext from '../../../../share';
 import api from '../../../../api';
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import './ProductList.scss';
-import DiscountContext from '../../../../discountContext';
 
 function ProductList(props) {
     const cart = useContext(CartContext);
-    const discount = useContext(DiscountContext);
-    const [data, setData] = useState();
+    const [data, setData] = useState([]);
     const [discountedPrice, setDiscountedPrice] = useState({ value: '', class: '' });
     const [cost, setCost] = useState(0);
-    const [discountedProducts, setDiscountedProducts] = useState([]);
+    const [selectedCoupon, setSelectedCoupon] = useState(null);
 
     useEffect(() => {
-        if (discount && discount.type === 'Product') setDiscountedProducts(discount.products);
-        else setDiscountedProducts([]);
-    }, [discount])
+        (
+            async () => {
+                const response = await fetch(`${api}/cart/getCart`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    withCredentials: true,
+                });
+                const content = await response.json();
+                cart.setCart(content.data);
+            })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        try {
-            if (discount && discount.type === 'Bill') {
-                const cartCurrentPrice = cart.cartObj.cartTotalPrice
-                if (cartCurrentPrice >= discount.minAmount && cartCurrentPrice <= discount.maxAmount) {
-                    const newPrice = ((100 - discount.discountPercentage) / 100) * cartCurrentPrice;
-                    setDiscountedPrice({ value: `PKR.${newPrice}`, class: 'line-through' });
-                } else throw new Error();
-            } else throw new Error();
-        } catch (error) {
-            setDiscountedPrice({ value: '', class: '' });
-        }
-    }, [discount, cart])
-
-    useEffect(() => {
-        try {
+        const getData = async () => {
+            const response = await fetch(`${api}/coupon/getCoupons-client-includeAll`, {
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const responseContent = await response.json();
+            const coupons = responseContent.coupons;
+            let coupon = null;
+            for (let i = 0; i < coupons.length; i++) {
+                const couponFromArray = coupons[i];
+                if (couponFromArray.redeemBy && new Date(couponFromArray.redeemBy) >= new Date()) {
+                    coupon = couponFromArray;
+                    break;
+                }
+            }
+            if (!coupon && coupons.length > 0) coupon = coupons[0];
+            let addonCouponSlugs = [];
+            let productCouponSlugs = [];
+            if (coupon && coupon.addons.length > 0) addonCouponSlugs = coupon.addons.map((add) => add.slug);
+            if (coupon && coupon.products.length > 0) productCouponSlugs = coupon.products.map((prod) => prod.slug);
             let content = [];
-            const removeCartItem = async (slug, type) => {
-                const response = await fetch(`${api}/cart/removeItem?${type}Slug=${slug}`, {
+            setSelectedCoupon(coupon);
+            const removeCartItem = async (key) => {
+                const response = await fetch(`${api}/cart/removeItem?key=${key}`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -49,8 +64,8 @@ function ProductList(props) {
                 const content = await response.json();
                 cart.setCart(content.data);
             }
-            const addCartItem = async (slug, type) => {
-                const response = await fetch(`${api}/cart/addItem?${type}Slug=${slug}`, {
+            const addCartItem = async (key) => {
+                const response = await fetch(`${api}/cart/addItem?key=${key}`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -61,75 +76,139 @@ function ProductList(props) {
                 cart.setCart(content.data);
             }
             const prices = [];
-            for (const key in cart.cartObj.data) {
-                if (Object.hasOwnProperty.call(cart.cartObj.data, key)) {
-                    const element = cart.cartObj.data[key];
-                    let newPrice = element.totalPrice;
+            for (const key in cart.cartObj) {
+                if (Object.hasOwnProperty.call(cart.cartObj, key)) {
+                    const element = cart.cartObj[key];
+                    const quantity = element.quantity;
+                    let totalPrice = 0;
                     let newPriceHTML = <></>;
-                    let lineClass = '';
-                    if (element.type === 'diy' && discount && discount.type === 'DIY') {
-                        newPrice = ((100 - discount.discountPercentage) / 100) * newPrice;
-                        newPriceHTML = <p style={{ color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{newPrice}</strong></p>
-                        lineClass = 'line-through';
-                        prices.push(newPrice);
-                    } else if (element.type ==='product' && discount && discount.type === 'Product') {
-                        const discObj = discountedProducts.find(prod => element.item.name === prod.item.name);
-                        if (discObj) {
-                            const newPrice = ((100 - discObj.discountPercentage) / 100) * element.totalPrice;
-                            newPriceHTML = <p style={{color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{newPrice}</strong></p>
-                            lineClass = 'line-through';
-                            prices.push(newPrice);
-                        } else prices.push(element.totalPrice);
-                    } else prices.push(element.totalPrice)
-                    let paraText = <div>
-                        <Heading3
-                            bold="Description:"
-                            classes="text-uppercase"
-                        />
-                        <ParaText
-                            text={element.item.description}
-                        />
-                    </div>
-                    if (element.type === 'diy') {
-                        const flowers = element.item.flowers.map((value, index) => {
-                            return value.name;
-                        }).join(', ');
-                        const addons = element.item.addons.map((value, index) => {
-                            return value.name;
-                        }).join(', ');
+                    let discountedPrice = null;
+                    let discountClass = '';
+                    let paraText = '';
+                    if (element.type === 'product') {
+                        let unitPrice = element.size.price;
+                        totalPrice = element.size.price * quantity;
+                        if (coupon) {
+                            let flag = true;
+                            if (coupon.redeemBy && new Date(coupon.redeemBy) < new Date()) flag = false;
+                            if (coupon.maxRedemptions && coupon.maxRedemptions <= coupon.timesRedeeemed) flag = false;
+                            if (flag) {
+                                if (coupon.appliedToProducts && productCouponSlugs.includes(element.productSlug)) {
+                                    discountClass = 'line-through';
+                                    if (coupon.type === 'Fixed Amount Discount') {
+                                        unitPrice = (unitPrice - coupon.amountOff) < 0 ? 0 : unitPrice - coupon.amountOff;
+                                        discountedPrice = unitPrice * quantity;
+                                        newPriceHTML = <p style={{ color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{discountedPrice}</strong></p>
+                                    } else {
+                                        unitPrice = (unitPrice - (unitPrice * (coupon.percentOff / 100))).toFixed(2);
+                                        discountedPrice = unitPrice * quantity;
+                                        newPriceHTML = <p style={{ color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{discountedPrice}</strong></p>
+                                    }
+                                }
+                            }
+                        }
+                        paraText = <div>
+                            <Heading3
+                                bold="Description:"
+                                classes="text-uppercase"
+                            />
+                            <ParaText
+                                text={element.description}
+                                href="/"
+                                classes="margin-bottom-0"
+                            />
+                            <ParaText
+                                bold="Size:"
+                                text={element.size.name}
+                                classes="margin-bottom-0"
+                                href='/'
+                            />
+                        </div>
+                    } else if (element.type === 'addon') {
+                        let unitPrice = element.price;
+                        totalPrice = element.price * quantity;
+                        if (coupon) {
+                            let flag = true;
+                            if (coupon.redeemBy && new Date(coupon.redeemBy) < new Date()) flag = false;
+                            if (coupon.maxRedemptions && coupon.maxRedemptions <= coupon.timesRedeeemed) flag = false;
+                            if (flag) {
+                                if (coupon.appliedToAddons && addonCouponSlugs.includes(element.addonSlug)) {
+                                    discountClass = 'line-through';
+                                    if (coupon.type === 'Fixed Amount Discount') {
+                                        unitPrice = (unitPrice - coupon.amountOff) < 0 ? 0 : unitPrice - coupon.amountOff;
+                                        discountedPrice = unitPrice * quantity;
+                                        newPriceHTML = <p style={{ color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{discountedPrice}</strong></p>
+                                    } else {
+                                        unitPrice = (unitPrice - (unitPrice * (coupon.percentOff / 100))).toFixed(2);
+                                        discountedPrice = unitPrice * quantity;
+                                        newPriceHTML = <p style={{ color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{discountedPrice}</strong></p>
+                                    }
+                                }
+                            }
+                        }
+                    } else if (element.type === 'diy') {
+                        const totalFlowersPrice = element.flowers.reduce((acc, curr) => acc + curr.price, 0);
+                        const totalAddonsPrice = element.addons.reduce((acc, curr) => acc + curr.price, 0);
+                        let unitPrice = element.size.price + element.base.price + element.color.price + totalFlowersPrice + totalAddonsPrice;
+                        totalPrice = (element.size.price + element.base.price + element.color.price + totalFlowersPrice + totalAddonsPrice) * quantity;
+                        if (coupon) {
+                            let flag = true;
+                            if (coupon.redeemBy && new Date(coupon.redeemBy) < new Date()) flag = false;
+                            if (coupon.maxRedemptions && coupon.maxRedemptions <= coupon.timesRedeeemed) flag = false;
+                            if (flag) {
+                                if (coupon.appliedToDIY) {
+                                    discountClass = 'line-through';
+                                    if (coupon.type === 'Fixed Amount Discount') {
+                                        unitPrice = (unitPrice - coupon.amountOff) < 0 ? 0 : unitPrice - coupon.amountOff;
+                                        discountedPrice = unitPrice * quantity;
+                                        newPriceHTML = <p style={{ color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{discountedPrice}</strong></p>
+                                    } else {
+                                        unitPrice = (unitPrice - (unitPrice * (coupon.percentOff / 100))).toFixed(2);
+                                        discountedPrice = unitPrice * quantity;
+                                        newPriceHTML = <p style={{ color: 'rgb(177, 0, 0)', textAlign: 'center' }}><strong>PKR.{discountedPrice}</strong></p>
+                                    }
+                                }
+                            }
+                        }
                         paraText = (
                             <div>
                                 <ParaText
                                     bold="Size:"
-                                    text={element.item.size}
+                                    href='/'
+                                    text={element.size.name}
                                     classes="text-capatalize margin-bottom-0"
                                 />
                                 <ParaText
                                     bold="Base:"
-                                    text={element.item.base}
+                                    href='/'
+                                    text={element.base.name}
                                     classes="text-capatalize margin-bottom-0"
                                 />
                                 <ParaText
                                     bold="Color:"
-                                    text={element.item.color}
+                                    href='/'
+                                    text={element.color.name}
                                     classes="text-capatalize margin-bottom-0"
                                 />
                                 <ParaText
                                     bold="Flowers:"
-                                    text={flowers}
+                                    href='/'
+                                    text={element.flowers.map(flower => flower.name).join(', ')}
                                     classes="text-capatalize margin-bottom-0"
                                 />
                                 {
-                                    element.item.addons.length === 0 ? (
+                                    element.addons.length === 0 ? (
                                         <ParaText
                                             bold="Addons:"
+                                            href='/'
                                             text="No Addons"
                                             classes="text-capatalize"
                                         />
                                     ) : (
                                         <ParaText
                                             bold="Addons:"
-                                            text={addons}
+                                            href='/'
+                                            text={element.addons.map(addon => addon.name).join(', ')}
                                             classes="text-capatalize"
                                         />
                                     )
@@ -137,59 +216,87 @@ function ProductList(props) {
                             </div>
                         )
                     }
-                    content.push(
-                        <Row key={key} className="product-row">
-                            <div className="global-mt-2 display-992" />
-                            <Col lg={3}>
-                                <img src={element.item.imagePath} alt={element.item.name} />
-                            </Col>
-                            <div className="global-mt-3 display-992" />
-                            <Col lg={5}>
-                                <Heading2
-                                    bold={element.item.name}
-                                    link="/"
-                                    classes="text-uppercase"
-                                />
-                                {paraText}
-                            </Col>
-                            <Col lg={1}>
-                                <div className="center-relative">
-                                    <input value={element.count} type="text" readOnly={true} />
-                                    <div className="add-remove-icons horizontal-center-relative">
-                                        <RemoveIcon onClick={_ => removeCartItem(key, element.type)} className="cart-icon" />
-                                        <AddIcon onClick={_ => addCartItem(key, element.type)} className="cart-icon" />
-                                    </div>
-                                </div>
-                            </Col>
-                            <div className="global-mt-3 display-992" />
-                            <Col className="align-middle">
-                                <div className="center-relative">
-                                    <Heading1
-                                        bold={`PKR.${element.totalPrice}`}
-                                        newPriceHTML={newPriceHTML}
-                                        classes={`text-uppercase text-center ${lineClass}`}
-                                    />
-                                </div>
-                            </Col>
-                            <div className="global-mt-2 display-992" />
-                            {/* <Col lg={1}>
-                                <i className="fa fa-times center-relative" aria-hidden="true"></i>
-                            </Col> */}
-                        </Row>
-                    )
+                    if (discountedPrice !== null) prices.push(discountedPrice);
+                    else prices.push(totalPrice);
+                    content.push({
+                        key: key,
+                        name: element.name,
+                        image: element.image,
+                        paraText,
+                        quantity: element.quantity,
+                        removeCartItem,
+                        addCartItem,
+                        totalPrice,
+                        newPriceHTML,
+                        discountClass,
+                    });
+                }
+            }
+            if (coupon && !coupon.appliedToProducts && !coupon.appliedToAddons && !coupon.appliedToDIY) {
+                if (coupon.type === 'Fixed Amount Discount') {
+                    let totalPrice = prices.reduce((acc, curr) => acc + curr, 0);
+                    if (coupon.minAmount <= totalPrice) {
+                        let discountedPrice = (totalPrice - coupon.amountOff) < 0 ? 0 : totalPrice - coupon.amountOff;
+                        setDiscountedPrice({ value: `PKR.${discountedPrice}`, class: 'line-through' });
+                    }
+                } else {
+                    let totalPrice = prices.reduce((acc, curr) => acc + curr, 0);
+                    if (coupon.minAmount <= totalPrice) {
+                        let discountedPrice = (totalPrice - (totalPrice * (coupon.percentOff / 100))).toFixed(2);
+                        setDiscountedPrice({ value: `PKR.${discountedPrice}`, class: 'line-through' });
+                    }
                 }
             }
             setCost(prices.reduce((a, b) => a + b, 0))
             setData(content);
-        } catch (error) {
-
-        }
-    }, [cart, discount, discountedProducts]);
+        };
+        getData();
+    }, [cart]);
 
     return (
         <Container fluid className="product-list-back">
             <Container className="product-list">
-                {data}
+                {
+                    data.map((element) => {
+                        return (
+                            <Row key={element.key} className="product-row">
+                                <div className="global-mt-2 display-992" />
+                                <Col lg={3}>
+                                    <img src={element.image} alt={element.name} />
+                                </Col>
+                                <div className="global-mt-3 display-992" />
+                                <Col lg={5}>
+                                    <Heading2
+                                        bold={element.name}
+                                        link="/"
+                                        classes="text-uppercase"
+                                    />
+                                    {element.paraText}
+                                </Col>
+                                <Col lg={1}>
+                                    <div className="center-relative">
+                                        <input value={element.quantity} type="text" readOnly={true} />
+                                        <div className="add-remove-icons horizontal-center-relative">
+                                            <RemoveIcon onClick={_ => element.removeCartItem(element.key)} className="cart-icon" />
+                                            <AddIcon onClick={_ => element.addCartItem(element.key)} className="cart-icon" />
+                                        </div>
+                                    </div>
+                                </Col>
+                                <div className="global-mt-3 display-992" />
+                                <Col className="align-middle">
+                                    <div className="center-relative">
+                                        <Heading1
+                                            bold={`PKR.${element.totalPrice}`}
+                                            newPriceHTML={selectedCoupon && selectedCoupon.minAmount <= cost ? element.newPriceHTML : <></>}
+                                            classes={`text-uppercase text-center ${selectedCoupon && selectedCoupon.minAmount <= cost ? element.discountClass : ''}`}
+                                        />
+                                    </div>
+                                </Col>
+                                <div className="global-mt-2 display-992" />
+                            </Row>
+                        )
+                    })
+                }
             </Container>
             <div className="global-mt-3" />
             <Row>
@@ -205,12 +312,6 @@ function ProductList(props) {
             <Row>
                 <div className="horizontal-center-margin">
                     <Button
-                        // setArrowLeft={props.setArrowLeft}
-                        // setArrowRight={props.setArrowRight}
-
-                        // cartForm={2}
-                        // setActive={props.setActive}
-                        // setActiveCompClass={props.setActiveCompClass}
                         to="/cart/delivery-info"
                         text="Proceed"
                         classes="text-uppercase"
